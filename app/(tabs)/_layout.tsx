@@ -25,7 +25,7 @@ export default function TabLayout() {
           {
             backgroundColor: palette.surface,
             borderColor: palette.border,
-            height: 64 + insets.bottom,
+            height: 60 + insets.bottom,
             paddingBottom: Math.max(8, insets.bottom),
           },
         ],
@@ -77,14 +77,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderWidth: 1,
     position: 'absolute',
-    marginHorizontal: 14,
+    marginHorizontal: 10,
     marginBottom: 8,
-    borderRadius: 18,
-    paddingTop: 8,
-    elevation: 0,
+    borderRadius: 22,
+    paddingTop: 6,
+    elevation: 4,
   },
   tabLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
 });
