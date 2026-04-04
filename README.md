@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+# Boardly - Airport Self Check-in Experience
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Boardly is a React Native + Expo app designed for a fast, self-service airport journey.
+The product focus is reducing queue friction and giving passengers clear control over check-in, boarding, seats, and baggage from a mobile-first interface.
 
-## Get started
+## Core Features
 
-1. Install dependencies
+- Self-service check-in flow with progress stages.
+- Digital boarding pass with interactive seat selection.
+- Baggage tagging and status tracking.
+- Real-time flight and gate updates.
+- Passenger profile with quick check-in preferences.
+- Staff-facing operations dashboard for passenger flow metrics.
 
-   ```bash
-   npm install
-   ```
+## Experience Principles
 
-2. Start the app
+- High clarity and speed over decorative complexity.
+- Strong visual hierarchy that feels premium but practical.
+- Light and dark mode support with dedicated semantic color tokens.
+- Modular screens and shared domain data for rapid hackathon iteration.
 
-   ```bash
-   npx expo start
-   ```
+## Tech Stack
 
-In the output, you'll find options to open the app in a
+- Expo Router for file-based navigation.
+- TypeScript with strict mode.
+- React Native + Expo SDK 54.
+- Shared themed primitives (`ThemedText`, `ThemedView`) with tokenized colors.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## App Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- `app/(tabs)/index.tsx`: Check-in home and trip progress.
+- `app/(tabs)/explore.tsx`: Digital boarding pass and seat selection.
+- `app/(tabs)/baggage.tsx`: Baggage tracking.
+- `app/(tabs)/updates.tsx`: Real-time updates feed.
+- `app/(tabs)/profile.tsx`: Passenger profile and preferences.
+- `app/staff.tsx`: Staff operations dashboard.
+- `constants/checkin-data.ts`: Mock domain entities and app data.
+- `constants/theme.ts`: Theme tokens for surfaces, borders, and semantic status colors.
 
-## Get a fresh project
-
-When you're ready, run:
+## Run Locally
 
 ```bash
-npm run reset-project
+npm install
+npm run start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Optional platform commands:
 
-## Learn more
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Lint
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run lint
+```
 
-## Join the community
+## Suggested Next Iterations
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Wire seat selection and check-in actions to real backend APIs.
+2. Add push notifications for gate and boarding events.
+3. Integrate QR/barcode generation for standards-compliant boarding passes.
+4. Add analytics instrumentation for conversion and wait-time insights.
