@@ -16,7 +16,8 @@ import {
   Plane,
   Plus,
   Minus,
-  Info
+  Info,
+  Printer
 } from "lucide-react";
 import { MOCK_FLIGHTS, MOCK_SEATS } from "@/lib/mock-data";
 import { CHECK_IN_STEPS, BAGGAGE_PRICES } from "@/lib/constants";
@@ -135,10 +136,13 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+  const defaultSeat = useMemo(() => MOCK_SEATS.find(s => s.id === "14A") || MOCK_SEATS[0], []);
+  const [originalSeat] = useState<Seat>(defaultSeat);
+  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(defaultSeat);
   const [baggage, setBaggage] = useState<{ type: string; weight: number; price: number }[]>([]);
+  const [printTag, setPrintTag] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [passengerData, setPassengerData] = useState({ firstName: "", lastName: "", email: "", phone: "", passportNumber: "", nationality: "" });
+  const [passengerData, setPassengerData] = useState({ firstName: "John", lastName: "Doe", email: "john@example.com", phone: "", passportNumber: "", nationality: "" });
 
   const goNext = () => { if (step < 4) { setDirection(1); setStep((s) => s + 1); } };
   const goBack = () => { if (step > 1) { setDirection(-1); setStep((s) => s - 1); } };
@@ -205,7 +209,20 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
                 <Card padding="lg">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold tracking-tight">Seat Allocation</h2>
-                    {selectedSeat && <Badge>{selectedSeat.id}</Badge>}
+                    {selectedSeat && (
+                      <div className="flex flex-col items-end">
+                        <Badge>{selectedSeat.id}</Badge>
+                        {selectedSeat.id !== originalSeat.id ? (
+                          <span className="text-[10px] uppercase tracking-widest font-bold mt-1 text-[var(--warning)] flex items-center">
+                            +${selectedSeat.price - originalSeat.price} Upgrade
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
+                            Current Assignment
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="overflow-y-auto max-h-[60vh] pb-4">
                     <SeatMap seats={MOCK_SEATS} selectedSeat={selectedSeat} onSelect={setSelectedSeat} />
@@ -241,6 +258,41 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
                         <button onClick={() => setBaggage(baggage.filter((_, idx)=>idx!==i))} className="text-destructive text-xs hover:underline">Remove</button>
                       </div>
                     ))}
+                    
+                    <div className="mt-6 flex justify-end">
+                      <Button variant="outline" size="sm" onClick={() => setPrintTag(true)} disabled={printTag}>
+                        <Printer size={14} className="mr-2" /> Print Physical Bag Tag
+                      </Button>
+                    </div>
+
+                    <AnimatePresence>
+                      {printTag && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }} 
+                          animate={{ height: "auto", opacity: 1 }} 
+                          className="overflow-hidden mt-6"
+                        >
+                          <div className="bg-white text-black p-4 border-dashed border-b-[3px] border-x-[3px] border-gray-300 font-mono text-[10px] w-48 shadow-lg mx-auto transform origin-top relative border-t-4 border-t-gray-500">
+                            {/* Paper slot shadow effect built into top border */}
+                            <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
+                              <span className="font-bold">BOARDLY</span>
+                              <span>{flight.flightNumber}</span>
+                            </div>
+                            <div className="text-2xl font-bold tracking-tight mb-1">{flight.arrival.code}</div>
+                            <div className="uppercase line-clamp-1">{flight.arrival.city || "Destination"}</div>
+                            
+                            <div className="mt-4 mb-3 flex items-center justify-center opacity-90 gap-[2px]">
+                              {/* Fake Barcode */}
+                              {[1,3,1,2,4,1,2,1,3,1,2].map((w, idx) => (
+                                <div key={idx} className="h-10 bg-black" style={{ width: `${w * 2}px` }} />
+                              ))}
+                            </div>
+                            
+                            <div className="text-center font-bold tracking-widest text-xs">BDL-849201</div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
               </Card>
