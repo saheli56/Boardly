@@ -10,7 +10,7 @@ import {
   Settings, LogOut, Shield, ChevronRight, Edit3
 } from "lucide-react";
 import { MOCK_PASSENGER } from "@/lib/mock-data";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { logout } from "@/lib/firebase/services";
 import { useRouter } from "next/navigation";
@@ -39,11 +39,14 @@ export default function ProfilePage() {
   const { user, loading } = useAuth();
   const [editing, setEditing] = useState(false);
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
   if (loading) return <div className="min-h-dvh flex items-center justify-center text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Establishing Secure Link...</div>;
-  if (!user) {
-    router.push("/login"); // Safety redirect
-    return null;
-  }
+  if (!user) return null;
 
   const fullName = user.displayName || "Anonymous Agent";
   const [firstName, ...rest] = fullName.split(" ");
