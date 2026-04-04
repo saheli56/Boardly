@@ -59,35 +59,78 @@ export default function BoardingPassScreen() {
           Premium seats are highlighted. Select any available seat to instantly update your pass.
         </ThemedText>
 
-        <View style={styles.seatGrid}>
-          {seatMap.flat().map((seat) => {
-            const locked = unavailableSeats.has(seat);
-            const active = selectedSeat === seat;
-            const premium = seat.endsWith('A') || seat.endsWith('F');
+        <View style={styles.selectedRow}>
+          <ThemedText type="subtitle">Selected seat</ThemedText>
+          <View style={styles.selectedBadgeWrap}>
+            <ThemedText style={[styles.selectedBadge, { color: palette.icon }]}>{selectedSeat}</ThemedText>
+            <Pressable
+              style={[styles.confirmButton, { backgroundColor: palette.tint }]}
+              onPress={() => { /* placeholder: confirm seat */ }}>
+              <ThemedText style={{ color: '#FFFFFF', fontWeight: '700' }}>Confirm</ThemedText>
+            </Pressable>
+          </View>
+        </View>
 
+        <View style={styles.seatMap}>
+          <View style={styles.colHeaders}>
+            <View style={styles.colLabel} />
+            {['A', 'B', 'C', 'D', 'E', 'F'].map((c) => (
+              <ThemedText key={c} style={[styles.colHeaderText, { color: palette.icon }]}>
+                {c}
+              </ThemedText>
+            ))}
+          </View>
+
+          {seatMap.map((row) => {
+            const rowNumber = row[0].slice(0, -1);
             return (
-              <Pressable
-                key={seat}
-                disabled={locked}
-                onPress={() => setSelectedSeat(seat)}
-                style={[
-                  styles.seat,
-                  {
-                    borderColor: active ? palette.info : premium ? palette.warning : palette.border,
-                    backgroundColor: active
-                      ? palette.info
-                      : locked
-                        ? palette.surfaceAlt
-                        : premium
-                          ? `${palette.warning}20`
-                          : palette.background,
-                    opacity: locked ? 0.45 : 1,
-                  },
-                ]}>
-                <ThemedText style={{ color: active ? '#FFFFFF' : palette.text, fontWeight: '700' }}>{seat}</ThemedText>
-              </Pressable>
+              <View key={rowNumber} style={styles.seatRow}>
+                <ThemedText style={[styles.rowNumber, { color: palette.icon }]}>{rowNumber}</ThemedText>
+                {row.map((seat) => {
+                  const locked = unavailableSeats.has(seat);
+                  const active = selectedSeat === seat;
+                  const premium = seat.endsWith('A') || seat.endsWith('F');
+
+                  return (
+                    <Pressable
+                      key={seat}
+                      disabled={locked}
+                      onPress={() => setSelectedSeat(seat)}
+                      style={[
+                        styles.seatButton,
+                        {
+                          borderColor: active ? palette.info : premium ? palette.warning : palette.border,
+                          backgroundColor: active
+                            ? palette.info
+                            : locked
+                              ? palette.surfaceAlt
+                              : premium
+                                ? `${palette.warning}20`
+                                : palette.background,
+                        },
+                      ]}>
+                      <ThemedText style={{ color: active ? '#FFFFFF' : palette.text, fontWeight: active ? '800' : '700' }}>{seat.slice(-1)}</ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
             );
           })}
+
+          <View style={styles.legendRow}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendSwatch, { backgroundColor: palette.tint }]} />
+              <ThemedText style={{ color: palette.icon }}>Selected</ThemedText>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendSwatch, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]} />
+              <ThemedText style={{ color: palette.icon }}>Unavailable</ThemedText>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendSwatch, { backgroundColor: palette.warning }]} />
+              <ThemedText style={{ color: palette.icon }}>Premium</ThemedText>
+            </View>
+          </View>
         </View>
       </Animated.View>
     </AppScaffold>
@@ -190,18 +233,83 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   seatGrid: {
-    marginTop: 2,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    marginTop: 6,
     gap: 8,
   },
-  seat: {
-    width: '15.5%',
-    minWidth: 47,
-    aspectRatio: 1,
+  selectedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 2,
+  },
+  selectedBadgeWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  selectedBadge: {
+    fontSize: 16,
+    fontWeight: '800',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  confirmButton: {
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  seatMap: {
+    marginTop: 10,
+  },
+  colHeaders: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  colLabel: {
+    width: 28,
+  },
+  colHeaderText: {
+    width: 44,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
+  seatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+  },
+  rowNumber: {
+    width: 28,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
+  seatButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
     borderWidth: 1,
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  legendRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  legendSwatch: {
+    width: 14,
+    height: 14,
+    borderRadius: 4,
+    borderWidth: 1,
   },
 });
