@@ -18,7 +18,6 @@ export default function BoardingPassScreen() {
   const { status, selectedSeat: contextSeat, confirmSeat, selectedFlightId, bagsCount } = checkin;
   const [selectedSeat, setSelectedSeat] = useState(contextSeat || '3A');
   const [ticketPayload, setTicketPayload] = useState<string | null>(null);
-  const [qrSize, setQrSize] = useState(160);
   useEffect(() => {
     if (contextSeat && contextSeat !== selectedSeat) setSelectedSeat(contextSeat);
   }, [contextSeat, selectedSeat]);
@@ -34,6 +33,44 @@ export default function BoardingPassScreen() {
   const handleConfirmSeat = () => {
     confirmSeat(selectedSeat);
     router.push('/baggage');
+  };
+
+  const renderSeatButton = (seat: string) => {
+    const locked = unavailableSeats.has(seat) || status === 'completed';
+    const active = selectedSeat === seat;
+    const premium = seat.endsWith('A') || seat.endsWith('F');
+
+    const seatSurface = active
+      ? palette.info
+      : locked
+        ? palette.surfaceAlt
+        : premium
+          ? `${palette.warning}22`
+          : palette.background;
+
+    return (
+      <Pressable
+        key={seat}
+        disabled={locked}
+        onPress={() => setSelectedSeat(seat)}
+        style={StyleSheet.flatten([
+          styles.seatButton,
+          {
+            borderColor: active ? palette.info : premium ? palette.warning : palette.border,
+            backgroundColor: seatSurface,
+          },
+        ])}>
+        <View
+          style={StyleSheet.flatten([
+            styles.seatHeadrest,
+            { backgroundColor: active ? '#FFFFFF66' : locked ? palette.border : palette.icon },
+          ])}
+        />
+        <ThemedText style={{ color: active ? '#FFFFFF' : palette.text, fontWeight: active ? '800' : '700' }}>
+          {seat.slice(-1)}
+        </ThemedText>
+      </Pressable>
+    );
   };
 
   if (status === 'not-started') {
@@ -70,14 +107,7 @@ export default function BoardingPassScreen() {
           <Meta label="Board" value="18:10" palette={palette} />
         </View>
 
-        <View
-          onLayout={(e) => {
-            const { width, height } = e.nativeEvent.layout;
-            const max = Math.min(width - 32, height - 32, 220);
-            const size = Math.max(96, Math.min(180, Math.floor(max)));
-            setQrSize(size);
-          }}
-          style={StyleSheet.flatten([styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
+        <View style={StyleSheet.flatten([styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
           {ticketPayload ? (
             <View style={StyleSheet.flatten([styles.qrWrap, { padding: 12, borderRadius: 8, backgroundColor: palette.surface }])}>
               <ThemedText style={{ fontFamily: Fonts.mono, fontSize: 12, color: palette.text }}>{ticketPayload}</ThemedText>
@@ -135,66 +165,92 @@ export default function BoardingPassScreen() {
         </View>
 
         <View style={styles.seatMap}>
-          <View style={styles.colHeaders}>
-            <View style={styles.colLabel} />
-            {['A', 'B', 'C', 'D', 'E', 'F'].map((c) => (
-              <ThemedText key={c} style={[styles.colHeaderText, { color: palette.icon }]}>
-                {c}
-              </ThemedText>
-            ))}
+          <View style={styles.cabinHeaderRow}>
+            <View>
+              <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Plane cabin map</ThemedText>
+              <ThemedText style={{ color: palette.icon, fontSize: 12 }}>Tap a seat to select your boarding position.</ThemedText>
+            </View>
+            <IconSymbol name="airplane.departure" size={18} color={palette.icon} />
           </View>
 
-          {seatMap.map((row) => {
-            const rowNumber = row[0].slice(0, -1);
-            return (
-              <View key={rowNumber} style={styles.seatRow}>
-                <ThemedText style={[styles.rowNumber, { color: palette.icon }]}>{rowNumber}</ThemedText>
-                {row.map((seat) => {
-                  const locked = unavailableSeats.has(seat) || status === 'completed';
-                  const active = selectedSeat === seat;
-                  const premium = seat.endsWith('A') || seat.endsWith('F');
-
-                  return (
-                    <Pressable
-                      key={seat}
-                      disabled={locked}
-                      onPress={() => setSelectedSeat(seat)}
-                      style={StyleSheet.flatten([
-                        styles.seatButton,
-                        {
-                          borderColor: active ? palette.info : premium ? palette.warning : palette.border,
-                          backgroundColor: active
-                            ? palette.info
-                            : locked
-                              ? palette.surfaceAlt
-                              : premium
-                                ? `${palette.warning}20`
-                                : palette.background,
-                        },
-                      ])}>
-                      <ThemedText style={{ color: active ? '#FFFFFF' : palette.text, fontWeight: active ? '800' : '700' }}>{seat.slice(-1)}</ThemedText>
-                    </Pressable>
-                  );
-                })}
+          <View style={StyleSheet.flatten([styles.planeOutline, { borderColor: palette.border, backgroundColor: palette.surfaceAlt }])}>
+            <View style={StyleSheet.flatten([styles.planeBody, { backgroundColor: palette.surface }])}>
+              <View style={StyleSheet.flatten([styles.windowTrack, { backgroundColor: palette.surfaceAlt }])}>
+                {seatMap.map((_, index) => (
+                  <View key={`window-${index}`} style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                ))}
               </View>
-            );
-          })}
 
-          <View style={styles.legendRow}>
-            <View style={styles.legendItem}>
-              <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.tint }])} />
-              <ThemedText style={{ color: palette.icon }}>Selected</ThemedText>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])} />
-              <ThemedText style={{ color: palette.icon }}>Unavailable</ThemedText>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.warning }])} />
-              <ThemedText style={{ color: palette.icon }}>Premium</ThemedText>
-            </View>
-          </View>
-        </View>
+               <View style={StyleSheet.flatten([styles.cockpit, { borderColor: palette.border, backgroundColor: palette.surface }])}>
+                 <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Cockpit</ThemedText>
+               </View>
+ 
+               <View style={styles.planeRowsWrap}>
+                 {seatMap.map((row, rowIndex) => {
+                   const rowNumber = row[0].slice(0, -1);
+                   const leftBlock = row.slice(0, 3);
+                   const rightBlock = row.slice(3);
+                   const isExitRow = rowIndex === Math.floor(seatMap.length / 2);
+ 
+                   return (
+                     <View key={rowNumber} style={styles.rowGroup}>
+                       <View style={styles.cabinRow}>
+                         <View style={styles.windowStrip}>
+                           <View style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                         </View>
+ 
+                         <View style={styles.seatBlock}>{leftBlock.map((seat) => renderSeatButton(seat))}</View>
+ 
+                         <View style={styles.aisleColumn}>
+                           <ThemedText style={StyleSheet.flatten([styles.rowNumber, { color: palette.icon }])}>{rowNumber}</ThemedText>
+                           <View style={StyleSheet.flatten([styles.aisleLine, { backgroundColor: palette.border }])} />
+                           {isExitRow ? <ThemedText style={StyleSheet.flatten([styles.exitText, { color: palette.warning }])}>EXIT</ThemedText> : null}
+                         </View>
+ 
+                         <View style={styles.seatBlock}>{rightBlock.map((seat) => renderSeatButton(seat))}</View>
+ 
+                         <View style={styles.windowStrip}>
+                           <View style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                         </View>
+                       </View>
+ 
+                       {rowIndex === 2 ? (
+                         <View style={StyleSheet.flatten([styles.wingPanel, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
+                           <ThemedText style={{ color: palette.icon, fontSize: 10, fontWeight: '700' }}>Wing</ThemedText>
+                         </View>
+                       ) : null}
+                     </View>
+                   );
+                 })}
+               </View>
+ 
+               <View style={StyleSheet.flatten([styles.cabinTail, { borderColor: palette.border, backgroundColor: palette.surface }])}>
+                 <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Rear galley</ThemedText>
+               </View>
+
+              <View style={StyleSheet.flatten([styles.windowTrack, { backgroundColor: palette.surfaceAlt }])}>
+                {seatMap.map((_, index) => (
+                  <View key={`window-bottom-${index}`} style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                ))}
+              </View>
+             </View>
+           </View>
+ 
+           <View style={styles.legendRow}>
+             <View style={styles.legendItem}>
+               <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.tint }])} />
+               <ThemedText style={{ color: palette.icon }}>Selected</ThemedText>
+             </View>
+             <View style={styles.legendItem}>
+               <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])} />
+               <ThemedText style={{ color: palette.icon }}>Unavailable</ThemedText>
+             </View>
+             <View style={styles.legendItem}>
+               <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: `${palette.warning}AA` }])} />
+               <ThemedText style={{ color: palette.icon }}>Premium</ThemedText>
+             </View>
+           </View>
+         </View>
       </Animated.View>
     </AppScaffold>
   );
@@ -336,43 +392,127 @@ const styles = StyleSheet.create({
   seatMap: {
     marginTop: 10,
   },
-  colHeaders: {
+  cabinHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    paddingHorizontal: 6,
   },
-  colLabel: {
-    width: 28,
+  planeOutline: {
+    borderWidth: 1,
+    borderRadius: 40,
+    padding: 10,
   },
-  colHeaderText: {
-    width: 44,
-    textAlign: 'center',
-    fontWeight: '700',
+  planeBody: {
+    borderRadius: 30,
+    paddingHorizontal: 10,
+    paddingVertical: 14,
+    gap: 10,
+    alignItems: 'center',
   },
-  seatRow: {
+  windowTrack: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  cockpit: {
+    borderWidth: 1,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    width: '60%',
+  },
+  planeRowsWrap: {
+    gap: 10,
+    marginTop: 6,
+    width: '100%',
+  },
+  rowGroup: {
+    gap: 4,
+  },
+  cabinRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
+    justifyContent: 'space-between',
+    gap: 6,
+  },
+  windowStrip: {
+    width: 18,
+    alignItems: 'center',
+  },
+  windowDot: {
+    width: 4,
+    height: 12,
+    borderRadius: 999,
+  },
+  seatBlock: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  aisleColumn: {
+    width: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
   },
   rowNumber: {
-    width: 28,
+    width: '100%',
     textAlign: 'center',
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  aisleLine: {
+    width: 10,
+    height: 32,
+    borderRadius: 999,
+  },
+  exitText: {
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.4,
   },
   seatButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 36,
+    height: 52,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
+    paddingTop: 4,
+  },
+  seatHeadrest: {
+    width: 20,
+    height: 4,
+    borderRadius: 999,
+  },
+  wingPanel: {
+    alignSelf: 'center',
+    width: '85%',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 4,
+    alignItems: 'center',
+  },
+  cabinTail: {
+    borderWidth: 1,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    width: '50%',
+    marginTop: 6,
   },
   legendRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
     marginTop: 12,
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   legendItem: {
     flexDirection: 'row',
