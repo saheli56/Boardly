@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   bannerTitle: {
-    fontSize: 21,
-    lineHeight: 27,
+    fontSize: 18,
+    lineHeight: 24,
     fontWeight: '800',
   },
   grid: {
@@ -115,8 +115,8 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   metricValue: {
-    fontSize: 26,
-    lineHeight: 30,
+    fontSize: 22,
+    lineHeight: 26,
     fontWeight: '800',
   },
   metricHint: {

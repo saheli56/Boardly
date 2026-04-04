@@ -92,16 +92,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
   },
   profileText: {
     gap: 2,
   },
   name: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '800',
-    lineHeight: 28,
+    lineHeight: 24,
   },
   statsCard: {
     borderWidth: 1,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   prefTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '800',
   },
   prefActions: {

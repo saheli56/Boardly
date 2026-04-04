@@ -48,14 +48,14 @@ export const Fonts = Platform.select({
     /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
     /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
+    rounded: 'Inter',
     /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
     sans: 'Inter',
     serif: 'serif',
-    rounded: 'normal',
+    rounded: 'Inter',
     mono: 'monospace',
   },
   web: {

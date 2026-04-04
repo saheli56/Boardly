@@ -145,8 +145,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   route: {
-    fontSize: 34,
-    lineHeight: 38,
+    fontSize: 28,
+    lineHeight: 32,
     fontWeight: '800',
   },
   metaGrid: {
