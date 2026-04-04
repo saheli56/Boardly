@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -7,18 +8,54 @@ import { AppScaffold } from '@/components/ui/app-scaffold';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { seatMap, unavailableSeats, upcomingFlights } from '@/constants/checkin-data';
 import { Colors, Fonts } from '@/constants/theme';
+import { useCheckInFlow } from '@/context/checkin-flow-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function BoardingPassScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
-  const [selectedSeat, setSelectedSeat] = useState('3A');
+  const router = useRouter();
+  const flow = useCheckInFlow();
   const flight = upcomingFlights[0];
 
   const bars = useMemo(
     () => Array.from({ length: 24 }, (_, i) => ({ id: `b-${i}`, h: i % 4 === 0 ? 40 : i % 3 === 0 ? 30 : 22 })),
     []
   );
+
+  if (!flow.started) {
+    return (
+      <AppScaffold subtitle="Boarding" title="Digital Pass">
+        <View style={[styles.gateCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <ThemedText type="subtitle">Start from Check-in</ThemedText>
+          <ThemedText style={{ color: palette.icon }}>
+            This screen becomes active after you begin check-in from the home tab.
+          </ThemedText>
+          <Pressable style={[styles.gateButton, { backgroundColor: palette.tint }]} onPress={() => router.push('/')}>
+            <ThemedText style={styles.gateButtonText}>Go to Check-in</ThemedText>
+          </Pressable>
+        </View>
+      </AppScaffold>
+    );
+  }
+
+  if (!flow.profileComplete) {
+    return (
+      <AppScaffold subtitle="Boarding" title="Digital Pass">
+        <View style={[styles.gateCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <ThemedText type="subtitle">Profile step pending</ThemedText>
+          <ThemedText style={{ color: palette.icon }}>
+            Confirm your profile preferences first so seat and service selections can be attached to your booking.
+          </ThemedText>
+          <Pressable
+            style={[styles.gateButton, { backgroundColor: palette.tint }]}
+            onPress={() => router.push('/profile')}>
+            <ThemedText style={styles.gateButtonText}>Complete Profile</ThemedText>
+          </Pressable>
+        </View>
+      </AppScaffold>
+    );
+  }
 
   return (
     <AppScaffold subtitle="Boarding" title="Digital Pass">
@@ -62,11 +99,14 @@ export default function BoardingPassScreen() {
         <View style={styles.selectedRow}>
           <ThemedText type="subtitle">Selected seat</ThemedText>
           <View style={styles.selectedBadgeWrap}>
-            <ThemedText style={[styles.selectedBadge, { color: palette.icon }]}>{selectedSeat}</ThemedText>
+            <ThemedText style={[styles.selectedBadge, { color: palette.icon }]}>{flow.selectedSeat}</ThemedText>
             <Pressable
               style={[styles.confirmButton, { backgroundColor: palette.tint }]}
-              onPress={() => { /* placeholder: confirm seat */ }}>
-              <ThemedText style={{ color: '#FFFFFF', fontWeight: '700' }}>Confirm</ThemedText>
+              onPress={() => {
+                flow.completeSeat();
+                router.push('/baggage');
+              }}>
+              <ThemedText style={{ color: '#FFFFFF', fontWeight: '700' }}>Confirm and Continue</ThemedText>
             </Pressable>
           </View>
         </View>
@@ -88,14 +128,14 @@ export default function BoardingPassScreen() {
                 <ThemedText style={[styles.rowNumber, { color: palette.icon }]}>{rowNumber}</ThemedText>
                 {row.map((seat) => {
                   const locked = unavailableSeats.has(seat);
-                  const active = selectedSeat === seat;
+                  const active = flow.selectedSeat === seat;
                   const premium = seat.endsWith('A') || seat.endsWith('F');
 
                   return (
                     <Pressable
                       key={seat}
                       disabled={locked}
-                      onPress={() => setSelectedSeat(seat)}
+                      onPress={() => flow.setSelectedSeat(seat)}
                       style={[
                         styles.seatButton,
                         {
@@ -311,5 +351,21 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 4,
     borderWidth: 1,
+  },
+  gateCard: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
+    gap: 10,
+  },
+  gateButton: {
+    minHeight: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gateButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
 });

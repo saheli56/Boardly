@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -7,11 +7,31 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { AppScaffold } from '@/components/ui/app-scaffold';
 import { upcomingFlights } from '@/constants/checkin-data';
 import { Colors, Fonts } from '@/constants/theme';
+import { useCheckInFlow } from '@/context/checkin-flow-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function CheckInScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
+  const router = useRouter();
+  const flow = useCheckInFlow();
+
+  const milestones = [
+    { label: 'Profile', done: flow.profileComplete },
+    { label: 'Seat', done: flow.seatComplete },
+    { label: 'Baggage', done: flow.baggageComplete },
+    { label: 'Review', done: flow.reviewComplete },
+    { label: 'Ticket', done: flow.ticketComplete },
+  ];
+
+  const handleStartOrResume = () => {
+    if (!flow.started) {
+      flow.startFlow();
+      router.push('/profile');
+      return;
+    }
+    router.push(flow.nextRoute);
+  };
 
   return (
     <AppScaffold
@@ -27,12 +47,16 @@ export default function CheckInScreen() {
         style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
         <ThemedText style={[styles.heroLabel, { color: palette.icon }]}>SEAMLESS AIRPORT FLOW</ThemedText>
         <ThemedText style={[styles.heroTitle, { fontFamily: Fonts.rounded }]}>Check in, pick seats, drop bags, board.</ThemedText>
-        <ThemedText style={[styles.heroBody, { color: palette.icon }]}>A complete mobile-first flow that reduces waiting and keeps every passenger informed in real time.</ThemedText>
+        <ThemedText style={[styles.heroBody, { color: palette.icon }]}>
+          {flow.started
+            ? `Flow in progress. Continue from ${flow.nextRoute === '/profile' ? 'profile setup' : flow.nextRoute === '/explore' ? 'seat selection' : flow.nextRoute === '/baggage' ? 'baggage planning' : 'final review'}.`
+            : 'A complete mobile-first flow that reduces waiting and keeps every passenger informed in real time.'}
+        </ThemedText>
 
         <View style={styles.heroActions}>
-          <Pressable style={[styles.primaryAction, { backgroundColor: palette.tint }]}>
+          <Pressable style={[styles.primaryAction, { backgroundColor: palette.tint }]} onPress={handleStartOrResume}>
             <IconSymbol name="airplane.departure" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.primaryActionText}>Begin Check-in</ThemedText>
+            <ThemedText style={styles.primaryActionText}>{flow.started ? 'Resume Flow' : 'Begin Check-in'}</ThemedText>
           </Pressable>
           <Link href="/staff" asChild>
             <Pressable style={[styles.secondaryAction, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
@@ -48,16 +72,15 @@ export default function CheckInScreen() {
         style={[styles.progressCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
         <View style={styles.rowBetween}>
           <ThemedText type="subtitle">Travel Progress</ThemedText>
-          <ThemedText style={{ color: palette.info, fontWeight: '700' }}>55%</ThemedText>
+          <ThemedText style={{ color: palette.info, fontWeight: '700' }}>{flow.progressPercent}%</ThemedText>
         </View>
         <View style={[styles.track, { backgroundColor: palette.surfaceAlt }]}>
-          <View style={[styles.fill, { width: '55%', backgroundColor: palette.info }]} />
+          <View style={[styles.fill, { width: `${flow.progressPercent}%`, backgroundColor: palette.info }]} />
         </View>
         <View style={styles.milestones}>
-          <Milestone label="Identity" done palette={palette} />
-          <Milestone label="Seat" done palette={palette} />
-          <Milestone label="Baggage" palette={palette} />
-          <Milestone label="Pass" palette={palette} />
+          {milestones.map((step) => (
+            <Milestone key={step.label} label={step.label} done={step.done} palette={palette} />
+          ))}
         </View>
       </Animated.View>
 
@@ -234,6 +257,8 @@ const styles = StyleSheet.create({
   milestones: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    rowGap: 8,
   },
   milestoneItem: {
     alignItems: 'center',
