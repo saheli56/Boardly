@@ -41,28 +41,28 @@ export default function BaggageScreen() {
       subtitle="Tracking"
       title="Baggage Journey"
       rightSlot={
-        <View style={[styles.headerIcon, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <View style={StyleSheet.flatten([styles.headerIcon, { backgroundColor: palette.surface, borderColor: palette.border }])}>
           <IconSymbol name="suitcase.fill" size={18} color={palette.info} />
         </View>
       }>
 
       {status === 'baggage' && (
-        <Animated.View entering={FadeInDown.duration(420)} style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <Animated.View entering={FadeInDown.duration(420)} style={StyleSheet.flatten([styles.card, { backgroundColor: palette.surface, borderColor: palette.border }])}>
           <ThemedText type="subtitle">How many bags are you checking?</ThemedText>
           <View style={styles.counterRow}>
             <Pressable
               onPress={() => setLocalBags(Math.max(0, localBags - 1))}
-              style={[styles.counterBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+              style={StyleSheet.flatten([styles.counterBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
               <ThemedText style={styles.counterText}>-</ThemedText>
             </Pressable>
             <ThemedText style={styles.counterValue}>{localBags}</ThemedText>
             <Pressable
               onPress={() => setLocalBags(localBags + 1)}
-              style={[styles.counterBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+              style={StyleSheet.flatten([styles.counterBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
               <ThemedText style={styles.counterText}>+</ThemedText>
             </Pressable>
           </View>
-          <Pressable style={[styles.confirmButton, { backgroundColor: palette.tint }]} onPress={handleConfirm}>
+          <Pressable style={StyleSheet.flatten([styles.confirmButton, { backgroundColor: palette.tint }])} onPress={handleConfirm}>
             <ThemedText style={{ color: '#FFFFFF', fontWeight: '700', textAlign: 'center' }}>Confirm & Finalize Pass</ThemedText>
           </Pressable>
         </Animated.View>
@@ -90,10 +90,10 @@ export default function BaggageScreen() {
         <Animated.View
           key={bag.id}
           entering={FadeInDown.delay(60 + i * 90).duration(420)}
-          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          style={StyleSheet.flatten([styles.card, { backgroundColor: palette.surface, borderColor: palette.border }])}>
           <View style={styles.rowBetween}>
             <ThemedText style={styles.tag}>{bag.tagNumber}</ThemedText>
-            <ThemedText style={[styles.badge, { color: palette.info, borderColor: palette.info }]}>
+            <ThemedText style={StyleSheet.flatten([styles.badge, { color: palette.info, borderColor: palette.info }])}>
               {bag.status.toUpperCase()}
             </ThemedText>
           </View>
@@ -103,8 +103,8 @@ export default function BaggageScreen() {
             <Meta label="Last updated" value={bag.updatedAt} palette={palette} />
           </View>
 
-          <View style={[styles.track, { backgroundColor: palette.surfaceAlt }]}>
-            <View style={[styles.fill, { backgroundColor: palette.info, width: getProgress(bag.status as any) }]} />
+          <View style={StyleSheet.flatten([styles.track, { backgroundColor: palette.surfaceAlt }])}>
+            <View style={StyleSheet.flatten([styles.fill, { backgroundColor: palette.info, width: getProgress(bag.status as any) }])} />
           </View>
 
           <View style={styles.timelineRow}>

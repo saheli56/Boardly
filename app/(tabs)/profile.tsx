@@ -16,8 +16,8 @@ export default function ProfileScreen() {
     <AppScaffold subtitle="Account" title="Passenger Profile">
       <Animated.View
         entering={FadeInDown.delay(40).duration(430)}
-        style={[styles.profileCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <View style={[styles.avatar, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.profileCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
+        <View style={StyleSheet.flatten([styles.avatar, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
           <ThemedText style={styles.avatarText}>AC</ThemedText>
         </View>
         <View style={styles.profileText}>
@@ -28,7 +28,7 @@ export default function ProfileScreen() {
 
       <Animated.View
         entering={FadeInDown.delay(120).duration(430)}
-        style={[styles.statsCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.statsCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <Info label="Passport" value={`**** ${passengerProfile.passportLast4}`} />
         <Info label="Preferred seat" value={passengerProfile.preferredSeat} />
         <Info label="Trips this year" value={`${passengerProfile.totalTripsThisYear}`} />
@@ -36,7 +36,7 @@ export default function ProfileScreen() {
 
       <Animated.View
         entering={FadeInDown.delay(180).duration(430)}
-        style={[styles.prefCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.prefCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <View style={styles.prefTopRow}>
           <View style={{ flex: 1, gap: 2 }}>
             <ThemedText style={styles.prefTitle}>Quick Check-in</ThemedText>
@@ -51,11 +51,11 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.prefActions}>
-          <Pressable style={[styles.prefButton, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          <Pressable style={StyleSheet.flatten([styles.prefButton, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
             <IconSymbol name="location.fill" size={16} color={palette.icon} />
             <ThemedText style={styles.prefButtonText}>Travel Docs</ThemedText>
           </Pressable>
-          <Pressable style={[styles.prefButton, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          <Pressable style={StyleSheet.flatten([styles.prefButton, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
             <IconSymbol name="checkmark.circle.fill" size={16} color={palette.icon} />
             <ThemedText style={styles.prefButtonText}>Saved Check-ins</ThemedText>
           </Pressable>

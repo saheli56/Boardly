@@ -46,20 +46,20 @@ export default function CheckInScreen() {
       subtitle="Passenger"
       title="Smart Check-in"
       rightSlot={
-        <View style={[styles.headerBadge, { backgroundColor: palette.surface, borderColor: palette.border }]}> 
+        <View style={StyleSheet.flatten([styles.headerBadge, { backgroundColor: palette.surface, borderColor: palette.border }])}> 
           <IconSymbol name="person.fill.checkmark" size={16} color={palette.info} />
         </View>
       }>
       <Animated.View
         entering={FadeInDown.delay(40).duration(450)}
-        style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <ThemedText style={[styles.heroLabel, { color: palette.icon }]}>SEAMLESS AIRPORT FLOW</ThemedText>
         <ThemedText style={[styles.heroTitle, { fontFamily: Fonts.rounded }]}>Check in, pick seats, drop bags, board.</ThemedText>
         <ThemedText style={[styles.heroBody, { color: palette.icon }]}>A complete mobile-first flow that reduces waiting and keeps every passenger informed in real time.</ThemedText>
 
         <View style={styles.heroActions}>
           <Pressable
-            style={[styles.primaryAction, { backgroundColor: palette.tint }]}
+            style={StyleSheet.flatten([styles.primaryAction, { backgroundColor: palette.tint }])}
             onPress={handleBeginCheckIn}>
             <IconSymbol name="airplane.departure" size={18} color="#FFFFFF" />
             <ThemedText style={styles.primaryActionText}>
@@ -71,7 +71,7 @@ export default function CheckInScreen() {
             </ThemedText>
           </Pressable>
           <Link href="/staff" asChild>
-            <Pressable style={[styles.secondaryAction, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+            <Pressable style={StyleSheet.flatten([styles.secondaryAction, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
               <IconSymbol name="chart.bar.fill" size={18} color={palette.icon} />
               <ThemedText style={styles.secondaryActionText}>Ops</ThemedText>
             </Pressable>
@@ -81,7 +81,7 @@ export default function CheckInScreen() {
 
       <Animated.View
         entering={FadeInDown.delay(120).duration(450)}
-        style={[styles.progressCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.progressCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <View style={styles.rowBetween}>
           <ThemedText type="subtitle">Travel Progress</ThemedText>
           <ThemedText style={{ color: palette.info, fontWeight: '700' }}>{progress.text}</ThemedText>
@@ -106,7 +106,7 @@ export default function CheckInScreen() {
         <Animated.View
           key={flight.id}
           entering={FadeInDown.delay(180 + index * 70).duration(420)}
-          style={[styles.flightCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          style={StyleSheet.flatten([styles.flightCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
           <View style={styles.rowBetween}>
             <ThemedText style={styles.route}>{flight.route}</ThemedText>
             <StatusPill status={flight.status} />

@@ -17,8 +17,8 @@ export default function UpdatesScreen() {
       subtitle="Live Feed"
       title="Flight Updates"
       rightSlot={
-        <View style={[styles.livePill, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <View style={[styles.liveDot, { backgroundColor: palette.success }]} />
+        <View style={StyleSheet.flatten([styles.livePill, { backgroundColor: palette.surface, borderColor: palette.border }])}>
+          <View style={StyleSheet.flatten([styles.liveDot, { backgroundColor: palette.success }])} />
           <ThemedText style={{ fontSize: 12, fontWeight: '700' }}>Live</ThemedText>
         </View>
       }>
@@ -34,8 +34,8 @@ export default function UpdatesScreen() {
           <Animated.View
             key={update.id}
             entering={FadeInDown.delay(60 + i * 90).duration(420)}
-            style={[styles.feedCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-            <View style={[styles.leftRail, { backgroundColor: accent }]} />
+            style={StyleSheet.flatten([styles.feedCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
+            <View style={StyleSheet.flatten([styles.leftRail, { backgroundColor: accent }])} />
             <View style={styles.feedBody}>
               <View style={styles.rowBetween}>
                 <ThemedText style={styles.feedTitle}>{update.title}</ThemedText>

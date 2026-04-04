@@ -47,15 +47,15 @@ export default function BoardingPassScreen() {
     <AppScaffold subtitle="Boarding" title="Digital Pass">
       <Animated.View
         entering={FadeInDown.delay(40).duration(420)}
-        style={[styles.passCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.passCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <View style={styles.rowBetween}>
-          <ThemedText style={[styles.airline, { color: palette.icon }]}>BOARDLY AIR</ThemedText>
-          <View style={[styles.zoneBadge, { borderColor: palette.info }]}> 
+          <ThemedText style={StyleSheet.flatten([styles.airline, { color: palette.icon }])}>BOARDLY AIR</ThemedText>
+          <View style={StyleSheet.flatten([styles.zoneBadge, { borderColor: palette.info }])}> 
             <ThemedText style={{ color: palette.info, fontWeight: '700' }}>Zone A</ThemedText>
           </View>
         </View>
 
-        <ThemedText style={[styles.route, { fontFamily: Fonts.rounded }]}>{'DAC -> SIN'}</ThemedText>
+        <ThemedText style={StyleSheet.flatten([styles.route, { fontFamily: Fonts.rounded }])}>{'DAC -> SIN'}</ThemedText>
 
         <View style={styles.metaGrid}>
           <Meta label="Flight" value={flight.code} palette={palette} />
@@ -65,9 +65,9 @@ export default function BoardingPassScreen() {
         </View>
 
         {status === 'completed' && (
-          <View style={[styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          <View style={StyleSheet.flatten([styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
             {bars.map((bar) => (
-              <View key={bar.id} style={[styles.bar, { height: bar.h, backgroundColor: palette.text }]} />
+              <View key={bar.id} style={StyleSheet.flatten([styles.bar, { height: bar.h, backgroundColor: palette.text }])} />
             ))}
           </View>
         )}
@@ -75,7 +75,7 @@ export default function BoardingPassScreen() {
 
       <Animated.View
         entering={FadeInDown.delay(120).duration(430)}
-        style={[styles.seatCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.seatCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <View style={styles.rowBetween}>
           <ThemedText type="subtitle">Seat Selection</ThemedText>
           <IconSymbol name="ticket.fill" size={18} color={palette.icon} />
@@ -87,10 +87,10 @@ export default function BoardingPassScreen() {
         <View style={styles.selectedRow}>
           <ThemedText type="subtitle">Selected seat</ThemedText>
           <View style={styles.selectedBadgeWrap}>
-            <ThemedText style={[styles.selectedBadge, { color: palette.icon }]}>{selectedSeat}</ThemedText>
+            <ThemedText style={StyleSheet.flatten([styles.selectedBadge, { color: palette.icon }])}>{selectedSeat}</ThemedText>
             {status !== 'completed' && (
               <Pressable
-                style={[styles.confirmButton, { backgroundColor: palette.tint }]}
+                style={StyleSheet.flatten([styles.confirmButton, { backgroundColor: palette.tint }])}
                 onPress={handleConfirmSeat}>
                 <ThemedText style={{ color: '#FFFFFF', fontWeight: '700' }}>Confirm</ThemedText>
               </Pressable>
@@ -123,7 +123,7 @@ export default function BoardingPassScreen() {
                       key={seat}
                       disabled={locked}
                       onPress={() => setSelectedSeat(seat)}
-                      style={[
+                      style={StyleSheet.flatten([
                         styles.seatButton,
                         {
                           borderColor: active ? palette.info : premium ? palette.warning : palette.border,
@@ -135,7 +135,7 @@ export default function BoardingPassScreen() {
                                 ? `${palette.warning}20`
                                 : palette.background,
                         },
-                      ]}>
+                      ])}>
                       <ThemedText style={{ color: active ? '#FFFFFF' : palette.text, fontWeight: active ? '800' : '700' }}>{seat.slice(-1)}</ThemedText>
                     </Pressable>
                   );
@@ -146,15 +146,15 @@ export default function BoardingPassScreen() {
 
           <View style={styles.legendRow}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendSwatch, { backgroundColor: palette.tint }]} />
+              <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.tint }])} />
               <ThemedText style={{ color: palette.icon }}>Selected</ThemedText>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendSwatch, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]} />
+              <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])} />
               <ThemedText style={{ color: palette.icon }}>Unavailable</ThemedText>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendSwatch, { backgroundColor: palette.warning }]} />
+              <View style={StyleSheet.flatten([styles.legendSwatch, { backgroundColor: palette.warning }])} />
               <ThemedText style={{ color: palette.icon }}>Premium</ThemedText>
             </View>
           </View>

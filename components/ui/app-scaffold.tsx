@@ -20,19 +20,19 @@ export function AppScaffold({ title, subtitle, children, rightSlot }: AppScaffol
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['top']}>
+    <SafeAreaView style={StyleSheet.flatten([styles.safeArea, { backgroundColor: palette.background }])} edges={['top']}>
       <ScrollView
         style={styles.screen}
-        contentContainerStyle={[
+        contentContainerStyle={StyleSheet.flatten([
           styles.content,
           {
             paddingBottom: insets.bottom + 112,
           },
-        ]}
+        ])}
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextWrap}>
-            <ThemedText style={[styles.subtitle, { color: palette.icon }]}>{subtitle}</ThemedText>
+            <ThemedText style={StyleSheet.flatten([styles.subtitle, { color: palette.icon }])}>{subtitle}</ThemedText>
             <ThemedText type="title" style={styles.title}>
               {title}
             </ThemedText>

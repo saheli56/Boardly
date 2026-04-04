@@ -22,7 +22,7 @@ export default function StaffScreen() {
     <AppScaffold subtitle="Airport Ops" title="Control Dashboard">
       <Animated.View
         entering={FadeInDown.delay(40).duration(420)}
-        style={[styles.banner, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        style={StyleSheet.flatten([styles.banner, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <ThemedText style={styles.bannerTitle}>Terminal 2 Operational Snapshot</ThemedText>
         <ThemedText style={{ color: palette.icon, lineHeight: 21 }}>
           Monitor passenger flow, queue pressure, and baggage automation from one live cockpit.
@@ -66,10 +66,10 @@ export default function StaffScreen() {
       {status !== 'not-started' ? (
         <Animated.View 
           entering={FadeInDown.delay(350).duration(420)}
-          style={[styles.activityCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          style={StyleSheet.flatten([styles.activityCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
           <View style={styles.rowBetween}>
             <ThemedText style={{ fontWeight: '800', fontSize: 16 }}>{passengerProfile.name}</ThemedText>
-            <View style={[styles.statusPill, { borderColor: status === 'completed' ? palette.success : palette.info }]}>
+            <View style={StyleSheet.flatten([styles.statusPill, { borderColor: status === 'completed' ? palette.success : palette.info }])}>
               <ThemedText style={{ fontSize: 11, fontWeight: '700', color: status === 'completed' ? palette.success : palette.info }}>
                 {status.toUpperCase()}
               </ThemedText>
@@ -94,7 +94,7 @@ export default function StaffScreen() {
       ) : (
         <Animated.View 
           entering={FadeInDown.delay(350).duration(420)}
-          style={[styles.activityCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border, alignItems: 'center' }]}>
+          style={StyleSheet.flatten([styles.activityCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border, alignItems: 'center' }])}>
           <ThemedText style={{ color: palette.icon }}>No active mobile check-ins at the moment.</ThemedText>
         </Animated.View>
       )}
