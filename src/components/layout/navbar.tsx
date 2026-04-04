@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plane, Menu, X, Bell } from "lucide-react";
+import { Plane, Menu, X, Bell, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NAV_LINKS } from "@/lib/constants";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { logout } from "@/lib/firebase/services";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -77,6 +80,18 @@ export function Navbar() {
               </button>
             )}
             <ThemeToggle />
+            {!isPublicPage && (
+              <button
+                onClick={async () => {
+                  await logout();
+                  router.push("/login");
+                }}
+                className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+                aria-label="Logout"
+              >
+                <LogOut size={16} />
+              </button>
+            )}
             {!isPublicPage && (
               <button
                 className="md:hidden w-8 h-8 flex items-center justify-center text-muted-foreground"

@@ -1,6 +1,33 @@
-import { ref, set, get, update, onValue, child, DatabaseReference } from "firebase/database";
-import { db } from "./config";
+import { ref, set, get, update, onValue, child } from "firebase/database";
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser
+} from "firebase/auth";
+import { db, auth } from "./config";
 import { MOCK_FLIGHTS, MOCK_SEATS, MOCK_ADMIN_STATS } from "@/lib/mock-data";
+
+/* ─── AUTH SERVICES ─── */
+
+export async function loginWithEmail(email: string, password: string) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function registerWithEmail(email: string, password: string) {
+  return createUserWithEmailAndPassword(auth, email, password);
+}
+
+export async function logout() {
+  return signOut(auth);
+}
+
+export function listenToAuth(callback: (user: FirebaseUser | null) => void) {
+  return onAuthStateChanged(auth, callback);
+}
+
+/* ─── DATABASE SERVICES ─── */
 
 /**
  * Ensures the database has the initial mock data if it's empty.
