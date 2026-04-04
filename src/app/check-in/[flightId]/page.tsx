@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, use } from "react";
+import { useState, useMemo, use, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,10 +19,11 @@ import {
   Info,
   Printer
 } from "lucide-react";
-import { MOCK_FLIGHTS, MOCK_SEATS } from "@/lib/mock-data";
+import { MOCK_FLIGHTS } from "@/lib/mock-data";
 import { CHECK_IN_STEPS, BAGGAGE_PRICES } from "@/lib/constants";
 import { formatTime, formatDate } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { listenToSeats, occupySeat, registerCheckInPing } from "@/lib/firebase/services";
 import type { Seat, BaggageItem } from "@/types";
 
 const slideVariants = {
@@ -136,9 +137,27 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
-  const defaultSeat = useMemo(() => MOCK_SEATS.find(s => s.id === "14A") || MOCK_SEATS[0], []);
-  const [originalSeat] = useState<Seat>(defaultSeat);
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(defaultSeat);
+  const [dbSeats, setDbSeats] = useState<Seat[]>([]);
+  
+  useEffect(() => {
+    // For demo purposes, we lock to flight-001 seat map
+    const unsubscribe = listenToSeats("flight-001", (liveSeats) => {
+      setDbSeats(liveSeats);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const defaultSeat = useMemo(() => dbSeats.find(s => s.id === "14A") || dbSeats[0], [dbSeats]);
+  const [originalSeat, setOriginalSeat] = useState<Seat | null>(null);
+  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+
+  useEffect(() => {
+    if (dbSeats.length > 0 && !originalSeat) {
+      const basicSeat = dbSeats.find(s => s.id === "14A") || dbSeats[0];
+      setOriginalSeat(basicSeat);
+      setSelectedSeat(basicSeat);
+    }
+  }, [dbSeats, originalSeat]);
   const [baggage, setBaggage] = useState<{ type: string; weight: number; price: number }[]>([]);
   const [printTag, setPrintTag] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -149,8 +168,20 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
 
   const handleConfirm = async () => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    router.push("/boarding-pass/bp-001");
+    try {
+      if (selectedSeat) {
+        // Lock seat in Firebase
+        await occupySeat("flight-001", selectedSeat.id);
+      }
+      // Ping admin dashboard stats via Firebase
+      await registerCheckInPing();
+      
+      await new Promise((r) => setTimeout(r, 800)); // artificial feeling of heavy lifting
+      router.push("/boarding-pass/bp-001");
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
   };
 
   return (
@@ -209,7 +240,7 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
                 <Card padding="lg">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold tracking-tight">Seat Allocation</h2>
-                    {selectedSeat && (
+                    {selectedSeat && originalSeat && (
                       <div className="flex flex-col items-end">
                         <Badge>{selectedSeat.id}</Badge>
                         {selectedSeat.id !== originalSeat.id ? (
@@ -225,7 +256,11 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
                     )}
                   </div>
                   <div className="overflow-y-auto max-h-[60vh] pb-4">
-                    <SeatMap seats={MOCK_SEATS} selectedSeat={selectedSeat} onSelect={setSelectedSeat} />
+                    {dbSeats.length > 0 ? (
+                      <SeatMap seats={dbSeats} selectedSeat={selectedSeat} onSelect={setSelectedSeat} />
+                    ) : (
+                      <div className="h-64 flex items-center justify-center text-xs text-muted-foreground">Loading Manifest...</div>
+                    )}
                   </div>
                 </Card>
               </div>

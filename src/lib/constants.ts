@@ -6,6 +6,7 @@ export const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/check-in", label: "Check In", icon: "ScanLine" },
   { href: "/flights", label: "Flights", icon: "Plane" },
+  { href: "/admin", label: "Admin", icon: "Activity" },
   { href: "/profile", label: "Profile", icon: "User" },
 ] as const;
 

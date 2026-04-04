@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Plane, Smartphone, QrCode } from "lucide-react";
 import Link from "next/link";
+import { seedDatabaseIfEmpty } from "@/lib/firebase/services";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -14,6 +16,10 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
+  useEffect(() => {
+    // Check and seed DB with mock data seamlessly in background
+    seedDatabaseIfEmpty().catch(console.error);
+  }, []);
   return (
     <div className="page-wrapper bg-background min-h-dvh flex flex-col pt-14">
       {/* ─── Minimal Hero ─── */}

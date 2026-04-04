@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -6,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Users, Plane, TrendingUp, Activity, CheckCircle2, AlertTriangle, XCircle, Timer, BarChart3
 } from "lucide-react";
-import { MOCK_ADMIN_STATS, MOCK_FLIGHTS } from "@/lib/mock-data";
+import { MOCK_FLIGHTS } from "@/lib/mock-data";
+import { listenToAdminStats } from "@/lib/firebase/services";
 import type { FlightStatus } from "@/types";
 import { formatTime } from "@/lib/utils";
 
@@ -15,12 +17,7 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.4,  } }),
 };
 
-const STAT_CARDS = [
-  { icon: Users, label: "Total Load", value: MOCK_ADMIN_STATS.totalCheckIns.toLocaleString(), change: "+12.3%" },
-  { icon: Plane, label: "Active Routes", value: MOCK_ADMIN_STATS.activeFlights.toString(), change: "+3" },
-  { icon: Timer, label: "Avg Process Time", value: MOCK_ADMIN_STATS.averageCheckInTime, change: "-18s" },
-  { icon: TrendingUp, label: "CSAT Score", value: `${MOCK_ADMIN_STATS.passengersSatisfaction}%`, change: "+2.1%" },
-];
+const STAT_CARDS_MOCK = [];
 
 function statusVariant(status: FlightStatus) {
   const map: Record<FlightStatus, string> = {
@@ -31,8 +28,25 @@ function statusVariant(status: FlightStatus) {
 }
 
 export default function AdminPage() {
-  const stats = MOCK_ADMIN_STATS;
-  const maxCheckins = Math.max(...stats.checkInsPerHour);
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    const unsubscribe = listenToAdminStats((data) => {
+      setStats(data);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (!stats) return <div className="min-h-dvh flex items-center justify-center text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Initializing Comm Link...</div>;
+
+  const maxCheckins = Math.max(...stats.checkInsPerHour, 1);
+
+  const STAT_CARDS = [
+    { icon: Users, label: "Total Load", value: stats.totalCheckIns.toLocaleString(), change: "+12.3%" },
+    { icon: Plane, label: "Active Routes", value: stats.activeFlights.toString(), change: "+3" },
+    { icon: Timer, label: "Avg Process Time", value: stats.averageCheckInTime, change: "-18s" },
+    { icon: TrendingUp, label: "CSAT Score", value: `${stats.passengersSatisfaction}%`, change: "+2.1%" },
+  ];
 
   return (
     <div className="page-wrapper bg-background min-h-dvh">
@@ -78,7 +92,7 @@ export default function AdminPage() {
                 <BarChart3 size={16} className="text-muted-foreground" />
               </div>
               <div className="flex-1 flex items-end gap-1 min-h-[200px]">
-                {stats.checkInsPerHour.map((count, i) => {
+                {stats.checkInsPerHour.map((count: number, i: number) => {
                   const height = (count / maxCheckins) * 100;
                   const isNow = i === new Date().getHours();
                   return (
@@ -113,8 +127,9 @@ export default function AdminPage() {
                 <Activity size={16} className="text-muted-foreground" />
               </div>
               <div className="space-y-4">
-                {Object.entries(stats.flightStatusBreakdown).map(([status, count]) => {
-                  const pct = (count / Object.values(stats.flightStatusBreakdown).reduce((a, b) => a + b, 0)) * 100;
+                {(Object.entries(stats.flightStatusBreakdown) as [string, number][]).map(([status, count]) => {
+                  const total = Object.values(stats.flightStatusBreakdown).reduce((a: any, b: any) => a + b, 0) as number;
+                  const pct = (count / total) * 100;
                   return (
                     <div key={status}>
                       <div className="flex justify-between text-xs mb-1.5 font-medium">

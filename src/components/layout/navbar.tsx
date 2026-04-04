@@ -121,10 +121,6 @@ export function Navbar() {
                   </Link>
                 );
               })}
-              <div className="h-px bg-border my-2" />
-              <Link href="/admin" className="text-sm font-medium text-muted-foreground">
-                Admin Panel
-              </Link>
             </nav>
           </motion.div>
         )}
