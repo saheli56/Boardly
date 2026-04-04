@@ -1,19 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { PwaRegister } from "@/components/pwa-register";
 import { Navbar } from "@/components/layout/navbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
-const bodyFont = Plus_Jakarta_Sans({
-  variable: "--font-body",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const headingFont = Space_Grotesk({
-  variable: "--font-heading",
+const interFont = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -67,7 +61,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${bodyFont.variable} ${headingFont.variable} ${monoFont.variable}`}
+      className={`${interFont.variable} ${monoFont.variable}`}
     >
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />

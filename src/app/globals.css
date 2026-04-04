@@ -84,8 +84,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   
-  --font-sans: var(--font-body);
-  --font-heading: var(--font-heading);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
