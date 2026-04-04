@@ -1,66 +1,36 @@
-# Boardly - Airport Self Check-in Experience
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Boardly is a React Native + Expo app designed for a fast, self-service airport journey.
-The product focus is reducing queue friction and giving passengers clear control over check-in, boarding, seats, and baggage from a mobile-first interface.
+## Getting Started
 
-## Core Features
-
-- Self-service check-in flow with progress stages.
-- Digital boarding pass with interactive seat selection.
-- Baggage tagging and status tracking.
-- Real-time flight and gate updates.
-- Passenger profile with quick check-in preferences.
-- Staff-facing operations dashboard for passenger flow metrics.
-
-## Experience Principles
-
-- High clarity and speed over decorative complexity.
-- Strong visual hierarchy that feels premium but practical.
-- Light and dark mode support with dedicated semantic color tokens.
-- Modular screens and shared domain data for rapid hackathon iteration.
-
-## Tech Stack
-
-- Expo Router for file-based navigation.
-- TypeScript with strict mode.
-- React Native + Expo SDK 54.
-- Shared themed primitives (`ThemedText`, `ThemedView`) with tokenized colors.
-
-## App Structure
-
-- `app/(tabs)/index.tsx`: Check-in home and trip progress.
-- `app/(tabs)/explore.tsx`: Digital boarding pass and seat selection.
-- `app/(tabs)/baggage.tsx`: Baggage tracking.
-- `app/(tabs)/updates.tsx`: Real-time updates feed.
-- `app/(tabs)/profile.tsx`: Passenger profile and preferences.
-- `app/staff.tsx`: Staff operations dashboard.
-- `constants/checkin-data.ts`: Mock domain entities and app data.
-- `constants/theme.ts`: Theme tokens for surfaces, borders, and semantic status colors.
-
-## Run Locally
+First, run the development server:
 
 ```bash
-npm install
-npm run start
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Optional platform commands:
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-npm run android
-npm run ios
-npm run web
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Lint
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-npm run lint
-```
+## Learn More
 
-## Suggested Next Iterations
+To learn more about Next.js, take a look at the following resources:
 
-1. Wire seat selection and check-in actions to real backend APIs.
-2. Add push notifications for gate and boarding events.
-3. Integrate QR/barcode generation for standards-compliant boarding passes.
-4. Add analytics instrumentation for conversion and wait-time insights.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
