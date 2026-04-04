@@ -174,64 +174,72 @@ export default function BoardingPassScreen() {
           </View>
 
           <View style={StyleSheet.flatten([styles.planeOutline, { borderColor: palette.border, backgroundColor: palette.surfaceAlt }])}>
+            <View style={styles.planeNose}>
+              <View style={StyleSheet.flatten([styles.noseTip, { backgroundColor: palette.surface }])} />
+            </View>
+
             <View style={StyleSheet.flatten([styles.planeBody, { backgroundColor: palette.surface }])}>
               <View style={StyleSheet.flatten([styles.windowTrack, { backgroundColor: palette.surfaceAlt }])}>
                 {seatMap.map((_, index) => (
-                  <View key={`window-${index}`} style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                  <View
+                    key={`window-top-${index}`}
+                    style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])}
+                  />
                 ))}
               </View>
 
-               <View style={StyleSheet.flatten([styles.cockpit, { borderColor: palette.border, backgroundColor: palette.surface }])}>
-                 <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Cockpit</ThemedText>
-               </View>
- 
-               <View style={styles.planeRowsWrap}>
-                 {seatMap.map((row, rowIndex) => {
-                   const rowNumber = row[0].slice(0, -1);
-                   const leftBlock = row.slice(0, 3);
-                   const rightBlock = row.slice(3);
-                   const isExitRow = rowIndex === Math.floor(seatMap.length / 2);
- 
-                   return (
-                     <View key={rowNumber} style={styles.rowGroup}>
-                       <View style={styles.cabinRow}>
-                         <View style={styles.windowStrip}>
-                           <View style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
-                         </View>
- 
-                         <View style={styles.seatBlock}>{leftBlock.map((seat) => renderSeatButton(seat))}</View>
- 
-                         <View style={styles.aisleColumn}>
-                           <ThemedText style={StyleSheet.flatten([styles.rowNumber, { color: palette.icon }])}>{rowNumber}</ThemedText>
-                           <View style={StyleSheet.flatten([styles.aisleLine, { backgroundColor: palette.border }])} />
-                           {isExitRow ? <ThemedText style={StyleSheet.flatten([styles.exitText, { color: palette.warning }])}>EXIT</ThemedText> : null}
-                         </View>
- 
-                         <View style={styles.seatBlock}>{rightBlock.map((seat) => renderSeatButton(seat))}</View>
- 
-                         <View style={styles.windowStrip}>
-                           <View style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
-                         </View>
-                       </View>
- 
-                       {rowIndex === 2 ? (
-                         <View style={StyleSheet.flatten([styles.wingPanel, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
-                           <ThemedText style={{ color: palette.icon, fontSize: 10, fontWeight: '700' }}>Wing</ThemedText>
-                         </View>
-                       ) : null}
-                     </View>
-                   );
-                 })}
-               </View>
- 
-               <View style={StyleSheet.flatten([styles.cabinTail, { borderColor: palette.border, backgroundColor: palette.surface }])}>
-                 <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Rear galley</ThemedText>
-               </View>
+              <View style={StyleSheet.flatten([styles.cockpit, { borderColor: palette.border, backgroundColor: palette.surface }])}>
+                <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Cockpit</ThemedText>
+              </View>
+
+              <View style={styles.planeRowsWrap}>
+                {seatMap.map((row, rowIndex) => {
+                  const rowNumber = row[0].slice(0, -1);
+                  const leftBlock = row.slice(0, 3);
+                  const rightBlock = row.slice(3);
+                  const isExitRow = rowIndex === Math.floor(seatMap.length / 2);
+
+                  return (
+                    <View key={rowNumber} style={styles.planeRowGroup}>
+                      <View style={styles.planeRow}>
+                        <View style={styles.fuselageSide}>
+                          <View style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                        </View>
+
+                        <View style={styles.seatBlock}>{leftBlock.map((seat) => renderSeatButton(seat))}</View>
+
+                        <View style={styles.aisleColumn}>
+                          <View style={StyleSheet.flatten([styles.aisleLine, { backgroundColor: palette.border }])} />
+                          <ThemedText style={StyleSheet.flatten([styles.rowNumber, { color: palette.icon }])}>{rowNumber}</ThemedText>
+                        </View>
+
+                        <View style={styles.seatBlock}>{rightBlock.map((seat) => renderSeatButton(seat))}</View>
+
+                        <View style={styles.fuselageSide}>
+                          <View style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
+                        </View>
+                      </View>
+
+                      {rowIndex === 3 ? (
+                        <View style={StyleSheet.flatten([styles.wingPanel, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
+                          <ThemedText style={{ color: palette.icon, fontSize: 10, fontWeight: '700' }}>Wing</ThemedText>
+                        </View>
+                      ) : null}
+                    </View>
+                  );
+                })}
+              </View>
+
+              <View style={StyleSheet.flatten([styles.cabinTail, { borderColor: palette.border, backgroundColor: palette.surface }])}>
+                <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>Rear galley</ThemedText>
+              </View>
 
               <View style={StyleSheet.flatten([styles.windowTrack, { backgroundColor: palette.surfaceAlt }])}>
                 {seatMap.map((_, index) => (
-                  <View key={`window-bottom-${index}`} style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])} />
-                ))}
+                  <View
+                    key={`window-bottom-${index}`}
+                    style={StyleSheet.flatten([styles.windowDot, { backgroundColor: palette.border }])}
+                  />
               </View>
              </View>
            </View>
@@ -404,6 +412,18 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     padding: 10,
   },
+  planeNose: {
+    alignItems: 'center',
+    marginBottom: -6,
+  },
+  noseTip: {
+    width: 110,
+    height: 22,
+    borderTopLeftRadius: 999,
+    borderTopRightRadius: 999,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
   planeBody: {
     borderRadius: 30,
     paddingHorizontal: 10,
@@ -431,16 +451,16 @@ const styles = StyleSheet.create({
     marginTop: 6,
     width: '100%',
   },
-  rowGroup: {
+  planeRowGroup: {
     gap: 4,
   },
-  cabinRow: {
+  planeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 6,
   },
-  windowStrip: {
+  fuselageSide: {
     width: 18,
     alignItems: 'center',
   },
