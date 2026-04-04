@@ -1,94 +1,94 @@
 import { Link } from 'expo-router';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppScaffold } from '@/components/ui/app-scaffold';
 import { upcomingFlights } from '@/constants/checkin-data';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 
 export default function CheckInScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <ThemedView style={[styles.heroCard, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-        <View style={[styles.heroGlow, { backgroundColor: palette.info }]} />
-        <ThemedText style={[styles.overline, { color: palette.icon }]}>SMART AIRPORT CHECK-IN</ThemedText>
-        <ThemedText type="title" style={styles.heroTitle}>
-          Skip the queue, start your trip in 90 seconds.
-        </ThemedText>
-        <ThemedText style={[styles.heroSubtitle, { color: palette.icon }]}>
-          Mobile and kiosk check-in in one flow with seat control, baggage tagging, and real-time updates.
-        </ThemedText>
+    <AppScaffold
+      subtitle="Passenger"
+      title="Smart Check-in"
+      rightSlot={
+        <View style={[styles.headerBadge, { backgroundColor: palette.surface, borderColor: palette.border }]}> 
+          <IconSymbol name="person.fill.checkmark" size={16} color={palette.info} />
+        </View>
+      }>
+      <Animated.View
+        entering={FadeInDown.delay(40).duration(450)}
+        style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <View style={[styles.heroTint, { backgroundColor: palette.info }]} />
+        <ThemedText style={[styles.heroLabel, { color: palette.icon }]}>SEAMLESS AIRPORT FLOW</ThemedText>
+        <ThemedText style={[styles.heroTitle, { fontFamily: Fonts.rounded }]}>Check in, pick seats, drop bags, board.</ThemedText>
+        <ThemedText style={[styles.heroBody, { color: palette.icon }]}>A complete mobile-first flow that reduces waiting and keeps every passenger informed in real time.</ThemedText>
 
         <View style={styles.heroActions}>
-          <TouchableOpacity style={[styles.primaryButton, { backgroundColor: palette.tint }]} activeOpacity={0.85}>
+          <Pressable style={[styles.primaryAction, { backgroundColor: palette.tint }]}>
             <IconSymbol name="airplane.departure" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.primaryButtonText}>Start Check-in</ThemedText>
-          </TouchableOpacity>
+            <ThemedText style={styles.primaryActionText}>Begin Check-in</ThemedText>
+          </Pressable>
           <Link href="/staff" asChild>
-            <TouchableOpacity
-              style={[
-                styles.secondaryButton,
-                {
-                  borderColor: palette.border,
-                  backgroundColor: palette.surfaceAlt,
-                },
-              ]}
-              activeOpacity={0.85}>
+            <Pressable style={[styles.secondaryAction, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
               <IconSymbol name="chart.bar.fill" size={18} color={palette.icon} />
-              <ThemedText style={{ fontWeight: '600' }}>Staff View</ThemedText>
-            </TouchableOpacity>
+              <ThemedText style={styles.secondaryActionText}>Ops</ThemedText>
+            </Pressable>
           </Link>
         </View>
-      </ThemedView>
+      </Animated.View>
 
-      <ThemedView style={[styles.progressCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+      <Animated.View
+        entering={FadeInDown.delay(120).duration(450)}
+        style={[styles.progressCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
         <View style={styles.rowBetween}>
-          <ThemedText type="subtitle">Check-in Progress</ThemedText>
-          <ThemedText style={{ color: palette.info, fontWeight: '700' }}>2 of 4 done</ThemedText>
+          <ThemedText type="subtitle">Travel Progress</ThemedText>
+          <ThemedText style={{ color: palette.info, fontWeight: '700' }}>55%</ThemedText>
         </View>
-        <View style={[styles.progressTrack, { backgroundColor: palette.surfaceAlt }]}>
-          <View style={[styles.progressFill, { backgroundColor: palette.info, width: '55%' }]} />
+        <View style={[styles.track, { backgroundColor: palette.surfaceAlt }]}>
+          <View style={[styles.fill, { width: '55%', backgroundColor: palette.info }]} />
         </View>
-        <View style={styles.stepsRow}>
-          <Step label="Passenger" done palette={palette} />
-          <Step label="Seat" done palette={palette} />
-          <Step label="Baggage" palette={palette} />
-          <Step label="Pass" palette={palette} />
+        <View style={styles.milestones}>
+          <Milestone label="Identity" done palette={palette} />
+          <Milestone label="Seat" done palette={palette} />
+          <Milestone label="Baggage" palette={palette} />
+          <Milestone label="Pass" palette={palette} />
         </View>
-      </ThemedView>
+      </Animated.View>
 
-      <ThemedText type="subtitle" style={styles.sectionTitle}>
-        Upcoming flights
-      </ThemedText>
-      {upcomingFlights.map((flight) => (
-        <ThemedView
+      <View style={styles.rowBetween}>
+        <ThemedText type="subtitle">Upcoming Flights</ThemedText>
+        <ThemedText style={{ color: palette.icon, fontWeight: '600' }}>Today</ThemedText>
+      </View>
+
+      {upcomingFlights.map((flight, index) => (
+        <Animated.View
           key={flight.id}
+          entering={FadeInDown.delay(180 + index * 70).duration(420)}
           style={[styles.flightCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
           <View style={styles.rowBetween}>
             <ThemedText style={styles.route}>{flight.route}</ThemedText>
             <StatusPill status={flight.status} />
           </View>
-          <View style={styles.metaRow}>
-            <Meta label="Flight" value={flight.code} palette={palette} />
-            <Meta label="Gate" value={flight.gate} palette={palette} />
-            <Meta label="Terminal" value={flight.terminal} palette={palette} />
-            <Meta label="Departure" value={flight.departureTime} palette={palette} />
+          <View style={styles.grid}>
+            <Cell label="Flight" value={flight.code} palette={palette} />
+            <Cell label="Gate" value={flight.gate} palette={palette} />
+            <Cell label="Terminal" value={flight.terminal} palette={palette} />
+            <Cell label="Departure" value={flight.departureTime} palette={palette} />
           </View>
-        </ThemedView>
+        </Animated.View>
       ))}
-    </ScrollView>
+    </AppScaffold>
   );
 }
 
-function Step({
+function Milestone({
   label,
   done,
   palette,
@@ -98,22 +98,22 @@ function Step({
   palette: (typeof Colors)['light'];
 }) {
   return (
-    <View style={styles.stepItem}>
+    <View style={styles.milestoneItem}>
       <View
         style={[
-          styles.stepDot,
+          styles.milestoneDot,
           {
             backgroundColor: done ? palette.success : palette.surfaceAlt,
             borderColor: done ? palette.success : palette.border,
           },
         ]}
       />
-      <ThemedText style={[styles.stepLabel, { color: palette.icon }]}>{label}</ThemedText>
+      <ThemedText style={[styles.milestoneLabel, { color: palette.icon }]}>{label}</ThemedText>
     </View>
   );
 }
 
-function Meta({
+function Cell({
   label,
   value,
   palette,
@@ -123,9 +123,9 @@ function Meta({
   palette: (typeof Colors)['light'];
 }) {
   return (
-    <View style={styles.metaItem}>
-      <ThemedText style={[styles.metaLabel, { color: palette.icon }]}>{label}</ThemedText>
-      <ThemedText style={styles.metaValue}>{value}</ThemedText>
+    <View style={styles.gridCell}>
+      <ThemedText style={[styles.gridLabel, { color: palette.icon }]}>{label}</ThemedText>
+      <ThemedText style={styles.gridValue}>{value}</ThemedText>
     </View>
   );
 }
@@ -137,160 +137,166 @@ function StatusPill({ status }: { status: 'on-time' | 'boarding' | 'delayed' }) 
   if (status === 'delayed') {
     return <ThemedText style={[styles.pill, styles.pillDelayed]}>Delayed</ThemedText>;
   }
-  return <ThemedText style={[styles.pill, styles.pillOnTime]}>On time</ThemedText>;
+  return <ThemedText style={[styles.pill, styles.pillOnTime]}>On Time</ThemedText>;
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 120,
-    gap: 14,
+  headerBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heroCard: {
-    borderRadius: 26,
-    padding: 22,
+    borderRadius: 28,
     borderWidth: 1,
+    padding: 20,
     overflow: 'hidden',
     gap: 12,
   },
-  heroGlow: {
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    opacity: 0.12,
+  heroTint: {
     position: 'absolute',
-    top: -120,
-    right: -90,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    top: -100,
+    right: -70,
+    opacity: 0.16,
   },
-  overline: {
+  heroLabel: {
     fontSize: 11,
     letterSpacing: 1.2,
     fontWeight: '700',
   },
   heroTitle: {
-    fontFamily: Fonts.rounded,
-    lineHeight: 36,
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: '800',
   },
-  heroSubtitle: {
+  heroBody: {
+    fontSize: 15,
     lineHeight: 22,
   },
   heroActions: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 4,
+    marginTop: 2,
   },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
+  primaryAction: {
+    flex: 1,
     borderRadius: 14,
+    minHeight: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    flexDirection: 'row',
   },
-  primaryButtonText: {
+  primaryActionText: {
     color: '#FFFFFF',
     fontWeight: '700',
   },
-  secondaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
+  secondaryAction: {
     borderRadius: 14,
+    minHeight: 46,
+    minWidth: 78,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    flexDirection: 'row',
     borderWidth: 1,
   },
+  secondaryActionText: {
+    fontWeight: '700',
+  },
   progressCard: {
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1,
-    padding: 18,
-    gap: 12,
+    padding: 16,
+    gap: 10,
   },
   rowBetween: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 12,
+    justifyContent: 'space-between',
+    gap: 10,
   },
-  progressTrack: {
+  track: {
     height: 10,
     borderRadius: 999,
     overflow: 'hidden',
   },
-  progressFill: {
+  fill: {
     height: '100%',
     borderRadius: 999,
   },
-  stepsRow: {
+  milestones: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  stepItem: {
+  milestoneItem: {
     alignItems: 'center',
     gap: 6,
   },
-  stepDot: {
+  milestoneDot: {
     width: 14,
     height: 14,
     borderRadius: 7,
     borderWidth: 1,
   },
-  stepLabel: {
+  milestoneLabel: {
     fontSize: 12,
-  },
-  sectionTitle: {
-    marginTop: 6,
+    fontWeight: '600',
   },
   flightCard: {
     borderRadius: 18,
     borderWidth: 1,
     padding: 16,
-    gap: 12,
+    gap: 10,
   },
   route: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
+    lineHeight: 24,
   },
-  metaRow: {
+  grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     rowGap: 10,
   },
-  metaItem: {
+  gridCell: {
     width: '50%',
     gap: 2,
   },
-  metaLabel: {
+  gridLabel: {
     fontSize: 12,
-    letterSpacing: 0.4,
     textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
-  metaValue: {
+  gridValue: {
     fontSize: 16,
     fontWeight: '700',
   },
   pill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    overflow: 'hidden',
     fontSize: 12,
     fontWeight: '700',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    overflow: 'hidden',
   },
   pillBoarding: {
-    color: '#0F5D74',
-    backgroundColor: '#BAE9F8',
+    color: '#074E65',
+    backgroundColor: '#B8EFFF',
   },
   pillDelayed: {
     color: '#7A2200',
-    backgroundColor: '#FFD6BF',
+    backgroundColor: '#FFD8C3',
   },
   pillOnTime: {
-    color: '#124A2A',
-    backgroundColor: '#CCF2DA',
+    color: '#154826',
+    backgroundColor: '#CFF7DC',
   },
 });

@@ -1,92 +1,95 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { ThemedText } from '@/components/themed-text';
+import { AppScaffold } from '@/components/ui/app-scaffold';
 import { adminMetrics } from '@/constants/checkin-data';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 
 export default function StaffScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <ThemedView style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <ThemedText type="title">Operations Dashboard</ThemedText>
-        <ThemedText style={{ color: palette.icon }}>
-          Live overview for airport staff to monitor flow, bottlenecks, and system automation.
+    <AppScaffold subtitle="Airport Ops" title="Control Dashboard">
+      <Animated.View
+        entering={FadeInDown.delay(40).duration(420)}
+        style={[styles.banner, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <ThemedText style={styles.bannerTitle}>Terminal 2 Operational Snapshot</ThemedText>
+        <ThemedText style={{ color: palette.icon, lineHeight: 21 }}>
+          Monitor passenger flow, queue pressure, and baggage automation from one live cockpit.
         </ThemedText>
-      </ThemedView>
+      </Animated.View>
 
       <View style={styles.grid}>
-        <MetricCard
+        <Metric
           label="Check-in completion"
           value={`${adminMetrics.checkInCompletionRate}%`}
-          helper="Today"
-          color={palette.success}
+          hint="Today"
+          accent={palette.success}
+          delay={110}
         />
-        <MetricCard
+        <Metric
           label="Avg kiosk wait"
           value={`${adminMetrics.avgKioskWaitMinutes} min`}
-          helper="Current"
-          color={palette.info}
+          hint="Current"
+          accent={palette.info}
+          delay={170}
         />
-        <MetricCard
-          label="Baggage automation"
+        <Metric
+          label="Automation rate"
           value={`${adminMetrics.baggageAutomationRate}%`}
-          helper="Terminal 2"
-          color={palette.warning}
+          hint="Baggage"
+          accent={palette.warning}
+          delay={230}
         />
-        <MetricCard
+        <Metric
           label="Active passengers"
           value={`${adminMetrics.activePassengers}`}
-          helper="Now"
-          color={palette.danger}
+          hint="Right now"
+          accent={palette.danger}
+          delay={290}
         />
       </View>
-    </ScrollView>
+    </AppScaffold>
   );
 }
 
-function MetricCard({
+function Metric({
   label,
   value,
-  helper,
-  color,
+  hint,
+  accent,
+  delay,
 }: {
   label: string;
   value: string;
-  helper: string;
-  color: string;
+  hint: string;
+  accent: string;
+  delay: number;
 }) {
   return (
-    <ThemedView style={[styles.metricCard, { borderColor: color }]}> 
+    <Animated.View entering={FadeInDown.delay(delay).duration(420)} style={[styles.metricCard, { borderColor: accent }]}>
+      <View style={[styles.metricDot, { backgroundColor: accent }]} />
       <ThemedText style={styles.metricLabel}>{label}</ThemedText>
       <ThemedText style={styles.metricValue}>{value}</ThemedText>
-      <ThemedText style={styles.metricHelper}>{helper}</ThemedText>
-    </ThemedView>
+      <ThemedText style={styles.metricHint}>{hint}</ThemedText>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 60,
-    gap: 14,
-  },
-  heroCard: {
-    borderWidth: 1,
+  banner: {
     borderRadius: 22,
-    padding: 18,
+    borderWidth: 1,
+    padding: 16,
     gap: 8,
+  },
+  bannerTitle: {
+    fontSize: 21,
+    lineHeight: 27,
+    fontWeight: '800',
   },
   grid: {
     flexDirection: 'row',
@@ -95,22 +98,28 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     width: '48%',
-    minHeight: 120,
+    minHeight: 128,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 14,
     justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  metricDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
   },
   metricLabel: {
     fontSize: 13,
-    opacity: 0.8,
+    opacity: 0.85,
   },
   metricValue: {
-    fontSize: 24,
+    fontSize: 26,
+    lineHeight: 30,
     fontWeight: '800',
-    lineHeight: 28,
   },
-  metricHelper: {
+  metricHint: {
     fontSize: 12,
     opacity: 0.8,
   },

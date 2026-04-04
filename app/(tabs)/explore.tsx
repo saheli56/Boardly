@@ -1,245 +1,208 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { ThemedText } from '@/components/themed-text';
+import { AppScaffold } from '@/components/ui/app-scaffold';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { seatMap, unavailableSeats, upcomingFlights } from '@/constants/checkin-data';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 
 export default function BoardingPassScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
   const [selectedSeat, setSelectedSeat] = useState('3A');
-  const activeFlight = upcomingFlights[0];
+  const flight = upcomingFlights[0];
 
-  const qrBars = useMemo(() => {
-    return Array.from({ length: 22 }, (_, index) => ({
-      key: `bar-${index}`,
-      height: index % 4 === 0 ? 42 : index % 3 === 0 ? 32 : 24,
-    }));
-  }, []);
+  const bars = useMemo(
+    () => Array.from({ length: 24 }, (_, i) => ({ id: `b-${i}`, h: i % 4 === 0 ? 40 : i % 3 === 0 ? 30 : 22 })),
+    []
+  );
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <ThemedView style={[styles.passCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+    <AppScaffold subtitle="Boarding" title="Digital Pass">
+      <Animated.View
+        entering={FadeInDown.delay(40).duration(420)}
+        style={[styles.passCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <View style={[styles.passGlow, { backgroundColor: palette.info }]} />
         <View style={styles.rowBetween}>
-          <ThemedText style={[styles.brandText, { color: palette.icon }]}>BOARDLY AIR</ThemedText>
-          <ThemedText style={[styles.zonePill, { color: palette.info, borderColor: palette.info }]}>Zone A</ThemedText>
+          <ThemedText style={[styles.airline, { color: palette.icon }]}>BOARDLY AIR</ThemedText>
+          <View style={[styles.zoneBadge, { borderColor: palette.info }]}> 
+            <ThemedText style={{ color: palette.info, fontWeight: '700' }}>Zone A</ThemedText>
+          </View>
         </View>
 
-        <ThemedText type="title" style={[styles.routeText, { fontFamily: Fonts.rounded }]}>
-          {'DAC -> SIN'}
-        </ThemedText>
+        <ThemedText style={[styles.route, { fontFamily: Fonts.rounded }]}>{'DAC -> SIN'}</ThemedText>
 
         <View style={styles.metaGrid}>
-          <BoardingMeta label="Flight" value={activeFlight.code} />
-          <BoardingMeta label="Gate" value={activeFlight.gate} />
-          <BoardingMeta label="Seat" value={selectedSeat} />
-          <BoardingMeta label="Boarding" value="18:10" />
+          <Meta label="Flight" value={flight.code} palette={palette} />
+          <Meta label="Gate" value={flight.gate} palette={palette} />
+          <Meta label="Seat" value={selectedSeat} palette={palette} />
+          <Meta label="Board" value="18:10" palette={palette} />
         </View>
 
-        <View style={[styles.qrContainer, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
-          {qrBars.map((bar) => (
-            <View
-              key={bar.key}
-              style={[
-                styles.qrBar,
-                {
-                  height: bar.height,
-                  backgroundColor: palette.text,
-                },
-              ]}
-            />
+        <View style={[styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          {bars.map((bar) => (
+            <View key={bar.id} style={[styles.bar, { height: bar.h, backgroundColor: palette.text }]} />
           ))}
         </View>
-      </ThemedView>
+      </Animated.View>
 
-      <ThemedView style={[styles.seatCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <ThemedText type="subtitle">Seat Selection</ThemedText>
+      <Animated.View
+        entering={FadeInDown.delay(120).duration(430)}
+        style={[styles.seatCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <View style={styles.rowBetween}>
+          <ThemedText type="subtitle">Seat Selection</ThemedText>
+          <IconSymbol name="ticket.fill" size={18} color={palette.icon} />
+        </View>
         <ThemedText style={{ color: palette.icon }}>
-          Tap to choose a seat before finalizing your digital boarding pass.
+          Premium seats are highlighted. Select any available seat to instantly update your pass.
         </ThemedText>
 
         <View style={styles.seatGrid}>
           {seatMap.flat().map((seat) => {
-            const isUnavailable = unavailableSeats.has(seat);
-            const isSelected = selectedSeat === seat;
+            const locked = unavailableSeats.has(seat);
+            const active = selectedSeat === seat;
+            const premium = seat.endsWith('A') || seat.endsWith('F');
 
             return (
-              <TouchableOpacity
+              <Pressable
                 key={seat}
-                disabled={isUnavailable}
-                activeOpacity={0.85}
+                disabled={locked}
                 onPress={() => setSelectedSeat(seat)}
                 style={[
                   styles.seat,
                   {
-                    backgroundColor: isSelected
+                    borderColor: active ? palette.info : premium ? palette.warning : palette.border,
+                    backgroundColor: active
                       ? palette.info
-                      : isUnavailable
+                      : locked
                         ? palette.surfaceAlt
-                        : palette.background,
-                    borderColor: isSelected ? palette.info : palette.border,
-                    opacity: isUnavailable ? 0.5 : 1,
+                        : premium
+                          ? `${palette.warning}20`
+                          : palette.background,
+                    opacity: locked ? 0.45 : 1,
                   },
                 ]}>
-                <ThemedText style={{ color: isSelected ? '#FFFFFF' : palette.text, fontWeight: '700' }}>
-                  {seat}
-                </ThemedText>
-              </TouchableOpacity>
+                <ThemedText style={{ color: active ? '#FFFFFF' : palette.text, fontWeight: '700' }}>{seat}</ThemedText>
+              </Pressable>
             );
           })}
         </View>
-
-        <View style={styles.legendRow}>
-          <Legend color={palette.info} label="Selected" />
-          <Legend color={palette.background} label="Available" borderColor={palette.border} />
-          <Legend color={palette.surfaceAlt} label="Occupied" />
-        </View>
-      </ThemedView>
-    </ScrollView>
+      </Animated.View>
+    </AppScaffold>
   );
 }
 
-function BoardingMeta({ label, value }: { label: string; value: string }) {
+function Meta({
+  label,
+  value,
+  palette,
+}: {
+  label: string;
+  value: string;
+  palette: (typeof Colors)['light'];
+}) {
   return (
     <View style={styles.metaItem}>
-      <ThemedText style={styles.metaLabel}>{label}</ThemedText>
+      <ThemedText style={[styles.metaLabel, { color: palette.icon }]}>{label}</ThemedText>
       <ThemedText style={styles.metaValue}>{value}</ThemedText>
     </View>
   );
 }
 
-function Legend({
-  color,
-  label,
-  borderColor,
-}: {
-  color: string;
-  label: string;
-  borderColor?: string;
-}) {
-  return (
-    <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { backgroundColor: color, borderColor: borderColor ?? color }]} />
-      <ThemedText style={styles.legendLabel}>{label}</ThemedText>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 120,
-    gap: 14,
-  },
   passCard: {
-    borderRadius: 24,
+    borderRadius: 26,
     borderWidth: 1,
     padding: 18,
-    gap: 14,
+    gap: 12,
+    overflow: 'hidden',
+  },
+  passGlow: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    position: 'absolute',
+    right: -80,
+    top: -100,
+    opacity: 0.15,
   },
   rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  brandText: {
+  airline: {
     fontSize: 12,
     letterSpacing: 1.1,
-    fontWeight: '700',
+    fontWeight: '800',
   },
-  zonePill: {
+  zoneBadge: {
     borderWidth: 1,
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    fontSize: 12,
-    fontWeight: '700',
   },
-  routeText: {
-    lineHeight: 36,
+  route: {
+    fontSize: 34,
+    lineHeight: 38,
+    fontWeight: '800',
   },
   metaGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    rowGap: 10,
+    rowGap: 8,
   },
   metaItem: {
     width: '50%',
-    gap: 2,
+    gap: 1,
   },
   metaLabel: {
-    fontSize: 12,
-    opacity: 0.8,
+    fontSize: 11,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   metaValue: {
     fontSize: 18,
     fontWeight: '700',
   },
-  qrContainer: {
-    height: 72,
-    borderRadius: 10,
+  qrArea: {
     borderWidth: 1,
+    borderRadius: 10,
+    height: 72,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'flex-end',
+    justifyContent: 'center',
     gap: 3,
     paddingBottom: 8,
     paddingHorizontal: 8,
     overflow: 'hidden',
   },
-  qrBar: {
+  bar: {
     width: 4,
     borderRadius: 2,
   },
   seatCard: {
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
-    padding: 18,
-    gap: 12,
+    padding: 16,
+    gap: 10,
   },
   seatGrid: {
+    marginTop: 2,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginTop: 6,
   },
   seat: {
     width: '15.5%',
-    minWidth: 48,
+    minWidth: 47,
     aspectRatio: 1,
-    borderRadius: 12,
     borderWidth: 1,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  legendRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendDot: {
-    width: 11,
-    height: 11,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  legendLabel: {
-    fontSize: 12,
   },
 });

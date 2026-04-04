@@ -1,144 +1,166 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { ThemedText } from '@/components/themed-text';
+import { AppScaffold } from '@/components/ui/app-scaffold';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { baggageTags } from '@/constants/checkin-data';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 
 export default function BaggageScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <ThemedView style={[styles.headerCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <View style={styles.headerRow}>
-          <IconSymbol name="suitcase.fill" size={22} color={palette.info} />
-          <ThemedText type="title">Smart Baggage</ThemedText>
+    <AppScaffold
+      subtitle="Tracking"
+      title="Baggage Journey"
+      rightSlot={
+        <View style={[styles.headerIcon, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <IconSymbol name="suitcase.fill" size={18} color={palette.info} />
         </View>
-        <ThemedText style={{ color: palette.icon }}>
-          Real-time tag journey from counter scan to aircraft loading.
-        </ThemedText>
-      </ThemedView>
+      }>
+      {baggageTags.map((bag, i) => (
+        <Animated.View
+          key={bag.id}
+          entering={FadeInDown.delay(60 + i * 90).duration(420)}
+          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <View style={styles.rowBetween}>
+            <ThemedText style={styles.tag}>{bag.tagNumber}</ThemedText>
+            <ThemedText style={[styles.badge, { color: palette.info, borderColor: palette.info }]}>
+              {bag.status.toUpperCase()}
+            </ThemedText>
+          </View>
 
-      {baggageTags.map((tag) => (
-        <ThemedView
-          key={tag.id}
-          style={[styles.tagCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <View style={styles.headerRow}>
-            <ThemedText style={styles.tagNumber}>{tag.tagNumber}</ThemedText>
-            <StatusBadge status={tag.status} />
+          <View style={styles.rowBetween}>
+            <Meta label="Current location" value={bag.belt} palette={palette} />
+            <Meta label="Last updated" value={bag.updatedAt} palette={palette} />
           </View>
-          <View style={styles.metaRow}>
-            <Meta label="Location" value={tag.belt} />
-            <Meta label="Updated" value={tag.updatedAt} />
+
+          <View style={[styles.track, { backgroundColor: palette.surfaceAlt }]}>
+            <View style={[styles.fill, { backgroundColor: palette.info, width: getProgress(bag.status) }]} />
           </View>
-          <View style={[styles.progressTrack, { backgroundColor: palette.surfaceAlt }]}>
-            <View style={[styles.progressFill, { backgroundColor: palette.info, width: progressFromStatus(tag.status) }]} />
+
+          <View style={styles.timelineRow}>
+            <Dot done palette={palette} />
+            <ThemedText style={{ color: palette.icon }}>Tagged</ThemedText>
+            <Dot done={bag.status !== 'tagged'} palette={palette} />
+            <ThemedText style={{ color: palette.icon }}>Security</ThemedText>
+            <Dot done={bag.status === 'loaded' || bag.status === 'arrived'} palette={palette} />
+            <ThemedText style={{ color: palette.icon }}>Loaded</ThemedText>
           </View>
-        </ThemedView>
+        </Animated.View>
       ))}
-    </ScrollView>
+    </AppScaffold>
   );
 }
 
-function Meta({ label, value }: { label: string; value: string }) {
+function getProgress(status: 'tagged' | 'security' | 'loaded' | 'arrived') {
+  if (status === 'tagged') return '24%';
+  if (status === 'security') return '54%';
+  if (status === 'loaded') return '84%';
+  return '100%';
+}
+
+function Dot({ done, palette }: { done?: boolean; palette: (typeof Colors)['light'] }) {
+  return (
+    <View
+      style={[
+        styles.dot,
+        {
+          backgroundColor: done ? palette.success : palette.surfaceAlt,
+          borderColor: done ? palette.success : palette.border,
+        },
+      ]}
+    />
+  );
+}
+
+function Meta({
+  label,
+  value,
+  palette,
+}: {
+  label: string;
+  value: string;
+  palette: (typeof Colors)['light'];
+}) {
   return (
     <View style={styles.metaItem}>
-      <ThemedText style={styles.metaLabel}>{label}</ThemedText>
+      <ThemedText style={[styles.metaLabel, { color: palette.icon }]}>{label}</ThemedText>
       <ThemedText style={styles.metaValue}>{value}</ThemedText>
     </View>
   );
 }
 
-function progressFromStatus(status: 'tagged' | 'security' | 'loaded' | 'arrived') {
-  if (status === 'tagged') return '25%';
-  if (status === 'security') return '52%';
-  if (status === 'loaded') return '84%';
-  return '100%';
-}
-
-function StatusBadge({ status }: { status: 'tagged' | 'security' | 'loaded' | 'arrived' }) {
-  const label = {
-    tagged: 'Tagged',
-    security: 'Security',
-    loaded: 'Loaded',
-    arrived: 'Arrived',
-  }[status];
-
-  return <ThemedText style={styles.badge}>{label}</ThemedText>;
-}
-
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
+  headerIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 120,
-    gap: 12,
-  },
-  headerCard: {
+  card: {
     borderWidth: 1,
     borderRadius: 22,
-    padding: 18,
-    gap: 8,
+    padding: 16,
+    gap: 12,
   },
-  headerRow: {
+  rowBetween: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
   },
-  tagCard: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 16,
-    gap: 10,
-  },
-  tagNumber: {
-    fontSize: 20,
-    fontWeight: '700',
+  tag: {
+    fontSize: 22,
+    fontWeight: '800',
   },
   badge: {
-    backgroundColor: '#E8F5FF',
-    color: '#0A5B83',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    borderWidth: 1,
     borderRadius: 999,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     paddingVertical: 4,
     overflow: 'hidden',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    gap: 12,
   },
   metaItem: {
     flex: 1,
+    gap: 2,
   },
   metaLabel: {
-    fontSize: 12,
-    opacity: 0.8,
+    fontSize: 11,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   metaValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
-  progressTrack: {
-    height: 8,
+  track: {
+    height: 9,
     borderRadius: 999,
     overflow: 'hidden',
   },
-  progressFill: {
+  fill: {
     height: '100%',
     borderRadius: 999,
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1,
   },
 });

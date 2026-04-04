@@ -1,122 +1,102 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { ThemedText } from '@/components/themed-text';
+import { AppScaffold } from '@/components/ui/app-scaffold';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { flightUpdates } from '@/constants/checkin-data';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 
 export default function UpdatesScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <ThemedView style={[styles.hero, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <View style={styles.heroTopRow}>
-          <ThemedText type="title">Live Updates</ThemedText>
-          <View style={[styles.dot, { backgroundColor: palette.success }]} />
+    <AppScaffold
+      subtitle="Live Feed"
+      title="Flight Updates"
+      rightSlot={
+        <View style={[styles.livePill, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <View style={[styles.liveDot, { backgroundColor: palette.success }]} />
+          <ThemedText style={{ fontSize: 12, fontWeight: '700' }}>Live</ThemedText>
         </View>
-        <ThemedText style={{ color: palette.icon }}>
-          Boarding time, gate shifts, and operational alerts synced in real time.
-        </ThemedText>
-      </ThemedView>
-
-      {flightUpdates.map((item) => {
+      }>
+      {flightUpdates.map((update, i) => {
         const accent =
-          item.priority === 'critical'
+          update.priority === 'critical'
             ? palette.danger
-            : item.priority === 'warning'
+            : update.priority === 'warning'
               ? palette.warning
               : palette.info;
 
         return (
-          <ThemedView
-            key={item.id}
-            style={[
-              styles.updateCard,
-              {
-                backgroundColor: palette.surface,
-                borderColor: palette.border,
-              },
-            ]}>
-            <View style={[styles.leftAccent, { backgroundColor: accent }]} />
-            <View style={styles.updateContent}>
-              <View style={styles.updateHeader}>
-                <ThemedText style={styles.updateTitle}>{item.title}</ThemedText>
-                <ThemedText style={{ color: palette.icon, fontWeight: '600' }}>{item.time}</ThemedText>
+          <Animated.View
+            key={update.id}
+            entering={FadeInDown.delay(60 + i * 90).duration(420)}
+            style={[styles.feedCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+            <View style={[styles.leftRail, { backgroundColor: accent }]} />
+            <View style={styles.feedBody}>
+              <View style={styles.rowBetween}>
+                <ThemedText style={styles.feedTitle}>{update.title}</ThemedText>
+                <ThemedText style={{ color: palette.icon, fontWeight: '700' }}>{update.time}</ThemedText>
               </View>
-              <ThemedText style={{ color: palette.icon }}>{item.detail}</ThemedText>
-              <View style={styles.updateFooter}>
-                <IconSymbol name="clock.fill" size={14} color={palette.icon} />
-                <ThemedText style={{ color: palette.icon, fontSize: 12 }}>Auto-refreshed</ThemedText>
+              <ThemedText style={{ color: palette.icon, lineHeight: 21 }}>{update.detail}</ThemedText>
+              <View style={styles.footerRow}>
+                <IconSymbol name="clock.fill" size={13} color={palette.icon} />
+                <ThemedText style={{ color: palette.icon, fontSize: 12 }}>Synced from airport control system</ThemedText>
               </View>
             </View>
-          </ThemedView>
+          </Animated.View>
         );
       })}
-    </ScrollView>
+    </AppScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 120,
-    gap: 12,
-  },
-  hero: {
+  livePill: {
+    minHeight: 40,
+    borderRadius: 14,
     borderWidth: 1,
-    borderRadius: 22,
-    padding: 18,
-    gap: 8,
-  },
-  heroTopRow: {
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 7,
   },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  updateCard: {
+  feedCard: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
     flexDirection: 'row',
   },
-  leftAccent: {
-    width: 5,
+  leftRail: {
+    width: 6,
   },
-  updateContent: {
+  feedBody: {
     flex: 1,
     padding: 14,
     gap: 8,
   },
-  updateHeader: {
+  rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 8,
   },
-  updateTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  feedTitle: {
+    fontSize: 17,
+    fontWeight: '800',
   },
-  updateFooter: {
+  footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     marginTop: 2,
   },
 });
