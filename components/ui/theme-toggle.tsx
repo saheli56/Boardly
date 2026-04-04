@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet } from 'react-native';
-import { Appearance } from 'react-native';
+import { Pressable, StyleSheet, Appearance } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';

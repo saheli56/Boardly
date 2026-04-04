@@ -20,11 +20,6 @@ export function AppScaffold({ title, subtitle, children, rightSlot }: AppScaffol
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['top']}>
-      <View style={styles.backgroundWrap} pointerEvents="none">
-        <View style={[styles.orbA, { backgroundColor: palette.info }]} />
-        <View style={[styles.orbB, { backgroundColor: palette.warning }]} />
-      </View>
-
       <ScrollView
         style={styles.screen}
         contentContainerStyle={[
@@ -80,27 +75,5 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Fonts.rounded,
     lineHeight: 36,
-  },
-  backgroundWrap: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  orbA: {
-    position: 'absolute',
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    top: -130,
-    right: -100,
-    opacity: 0.1,
-  },
-  orbB: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    top: 180,
-    left: -120,
-    opacity: 0.08,
   },
 });

@@ -25,7 +25,6 @@ export default function CheckInScreen() {
       <Animated.View
         entering={FadeInDown.delay(40).duration(450)}
         style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <View style={[styles.heroTint, { backgroundColor: palette.info }]} />
         <ThemedText style={[styles.heroLabel, { color: palette.icon }]}>SEAMLESS AIRPORT FLOW</ThemedText>
         <ThemedText style={[styles.heroTitle, { fontFamily: Fonts.rounded }]}>Check in, pick seats, drop bags, board.</ThemedText>
         <ThemedText style={[styles.heroBody, { color: palette.icon }]}>A complete mobile-first flow that reduces waiting and keeps every passenger informed in real time.</ThemedText>
@@ -158,12 +157,12 @@ const styles = StyleSheet.create({
   },
   heroTint: {
     position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    top: -100,
-    right: -70,
-    opacity: 0.16,
+    width: 0,
+    height: 0,
+    borderRadius: 0,
+    top: 0,
+    right: 0,
+    opacity: 0,
   },
   heroLabel: {
     fontSize: 11,

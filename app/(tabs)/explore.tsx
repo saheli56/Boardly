@@ -25,7 +25,6 @@ export default function BoardingPassScreen() {
       <Animated.View
         entering={FadeInDown.delay(40).duration(420)}
         style={[styles.passCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <View style={[styles.passGlow, { backgroundColor: palette.info }]} />
         <View style={styles.rowBetween}>
           <ThemedText style={[styles.airline, { color: palette.icon }]}>BOARDLY AIR</ThemedText>
           <View style={[styles.zoneBadge, { borderColor: palette.info }]}> 
@@ -121,13 +120,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   passGlow: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 0,
+    height: 0,
+    borderRadius: 0,
     position: 'absolute',
-    right: -80,
-    top: -100,
-    opacity: 0.15,
+    right: 0,
+    top: 0,
+    opacity: 0,
   },
   rowBetween: {
     flexDirection: 'row',
