@@ -30,16 +30,19 @@ export function AppScaffold({ title, subtitle, children, rightSlot }: AppScaffol
           },
         ])}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerTextWrap}>
-            <ThemedText style={StyleSheet.flatten([styles.subtitle, { color: palette.icon }])}>{subtitle}</ThemedText>
-            <ThemedText type="title" style={styles.title}>
-              {title}
-            </ThemedText>
+        <View style={styles.inner}>
+          <View style={styles.headerRow}>
+            <View style={styles.headerTextWrap}>
+              <ThemedText style={StyleSheet.flatten([styles.subtitle, { color: palette.icon }])}>{subtitle}</ThemedText>
+              <ThemedText type="title" style={styles.title}>
+                {title}
+              </ThemedText>
+            </View>
+            <ThemeToggle />
           </View>
-          <ThemeToggle />
+
+          {children}
         </View>
-        {children}
       </ScrollView>
     </SafeAreaView>
   );
@@ -56,6 +59,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     gap: 14,
+  },
+  inner: {
+    width: '100%',
+    maxWidth: 980,
+    alignSelf: 'center',
   },
   headerRow: {
     flexDirection: 'row',

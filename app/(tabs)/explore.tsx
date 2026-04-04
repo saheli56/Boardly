@@ -10,7 +10,6 @@ import { seatMap, unavailableSeats, upcomingFlights } from '@/constants/checkin-
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useCheckInFlow } from '@/context/checkin-flow-context';
-import QRCode from 'react-native-qrcode-svg';
 
 export default function BoardingPassScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -71,36 +70,27 @@ export default function BoardingPassScreen() {
           <Meta label="Board" value="18:10" palette={palette} />
         </View>
 
-<<<<<<< HEAD
-        {status === 'completed' && (
-          <View style={StyleSheet.flatten([styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
-            {bars.map((bar) => (
-              <View key={bar.id} style={StyleSheet.flatten([styles.bar, { height: bar.h, backgroundColor: palette.text }])} />
-            ))}
-          </View>
-        )}
-=======
-        <View onLayout={(e) => {
+        <View
+          onLayout={(e) => {
             const { width, height } = e.nativeEvent.layout;
             const max = Math.min(width - 32, height - 32, 220);
             const size = Math.max(96, Math.min(180, Math.floor(max)));
             setQrSize(size);
           }}
-          style={[styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          style={StyleSheet.flatten([styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
           {ticketPayload ? (
-            <View style={styles.qrWrap}>
-              <QRCode value={ticketPayload} size={qrSize} color="#000000" backgroundColor="#FFFFFF" />
-              <ThemedText style={[styles.qrCaption, { color: palette.icon }]}>Show this at the gate</ThemedText>
+            <View style={StyleSheet.flatten([styles.qrWrap, { padding: 12, borderRadius: 8, backgroundColor: palette.surface }])}>
+              <ThemedText style={{ fontFamily: Fonts.mono, fontSize: 12, color: palette.text }}>{ticketPayload}</ThemedText>
+              <ThemedText style={StyleSheet.flatten([styles.qrCaption, { color: palette.icon }])}>Show this at the gate</ThemedText>
             </View>
           ) : status === 'completed' ? (
             <ThemedText style={{ color: palette.icon }}>Ticket pending generation. Use &quot;Generate Pass&quot; below.</ThemedText>
           ) : (
             bars.map((bar) => (
-              <View key={bar.id} style={[styles.bar, { height: bar.h, backgroundColor: palette.text }]} />
+              <View key={bar.id} style={StyleSheet.flatten([styles.bar, { height: bar.h, backgroundColor: palette.text }])} />
             ))
           )}
         </View>
->>>>>>> 76d950a627ff4315f04239e70f33a907d32e3dbb
       </Animated.View>
 
       <Animated.View
