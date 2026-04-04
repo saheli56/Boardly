@@ -6,9 +6,17 @@ import { QRCodeSVG } from "qrcode.react";
 import { MOCK_BOARDING_PASS } from "@/lib/mock-data";
 import { formatTime, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function BoardingPassPage() {
+  const { user, loading } = useAuth();
   const bp = MOCK_BOARDING_PASS;
+
+  if (loading) return <div className="min-h-dvh flex items-center justify-center text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Establishing Secure Link...</div>;
+
+  const fullName = user?.displayName || "Anonymous Agent";
+  const [firstName, ...rest] = fullName.split(" ");
+  const lastName = rest.join(" ") || " ";
 
   return (
     <div className="page-wrapper flex items-center justify-center p-4 bg-background">
@@ -43,7 +51,7 @@ export default function BoardingPassPage() {
             {/* passenger */}
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">Passenger</p>
-              <p className="text-sm font-semibold">{bp.passenger.lastName.toUpperCase()}, {bp.passenger.firstName.toUpperCase()}</p>
+              <p className="text-sm font-semibold">{lastName.toUpperCase()}, {firstName.toUpperCase()}</p>
             </div>
 
             {/* Grid stats */}

@@ -10,6 +10,26 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/firebase/services";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/auth-provider";
+
+function UserBadge() {
+  const { user } = useAuth();
+  if (!user) return null;
+  
+  const name = user.displayName || user.email?.split("@")[0] || "User";
+  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  
+  return (
+    <Link href="/profile" className="flex items-center gap-2 group ml-2 shrink-0">
+      <div className="w-7 h-7 rounded-md bg-secondary text-secondary-foreground flex items-center justify-center text-[10px] font-bold font-mono border border-border group-hover:border-primary transition-colors">
+        {initials || "U"}
+      </div>
+      <span className="hidden sm:inline text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors max-w-[80px] truncate">
+        {name.split(" ")[0]}
+      </span>
+    </Link>
+  );
+}
 
 export function Navbar() {
   const router = useRouter();
@@ -80,13 +100,14 @@ export function Navbar() {
               </button>
             )}
             <ThemeToggle />
+            {!isPublicPage && <UserBadge />}
             {!isPublicPage && (
               <button
                 onClick={async () => {
                   await logout();
                   router.push("/login");
                 }}
-                className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors ml-1"
                 aria-label="Logout"
               >
                 <LogOut size={16} />

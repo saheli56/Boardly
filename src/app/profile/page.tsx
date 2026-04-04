@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  User, Mail, Phone, Globe, CreditCard, Plane, MapPin, Clock, Award,
+  User as UserIcon, Mail, Phone, Globe, CreditCard, Plane, MapPin, Clock, Award,
   Settings, LogOut, Shield, ChevronRight, Edit3
 } from "lucide-react";
 import { MOCK_PASSENGER } from "@/lib/mock-data";
 import { useState } from "react";
+import { useAuth } from "@/components/providers/auth-provider";
+import { logout } from "@/lib/firebase/services";
+import { useRouter } from "next/navigation";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -32,8 +35,25 @@ const MENU_ITEMS = [
 ];
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const [editing, setEditing] = useState(false);
-  const p = MOCK_PASSENGER;
+
+  if (loading) return <div className="min-h-dvh flex items-center justify-center text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Establishing Secure Link...</div>;
+  if (!user) {
+    router.push("/login"); // Safety redirect
+    return null;
+  }
+
+  const fullName = user.displayName || "Anonymous Agent";
+  const [firstName, ...rest] = fullName.split(" ");
+  const lastName = rest.join(" ") || " ";
+  const initials = (firstName[0] || "?") + (lastName[0] || "");
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   return (
     <div className="page-wrapper bg-background min-h-dvh">
@@ -42,13 +62,13 @@ export default function ProfilePage() {
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="mb-8 border-b border-border pb-6 flex flex-col md:flex-row gap-6 md:items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-md bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold font-mono shadow-sm">
-              {p.firstName[0]}{p.lastName[0]}
+              {initials}
             </div>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{p.firstName} {p.lastName}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{fullName}</h1>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm font-mono text-muted-foreground">{p.frequentFlyerId}</span>
-                <Badge variant="outline" className="text-[10px] uppercase tracking-widest">{p.frequentFlyerTier}</Badge>
+                <span className="text-sm font-mono text-muted-foreground uppercase">{user.email?.split("@")[0]}</span>
+                <Badge variant="outline" className="text-[10px] uppercase tracking-widest">Standard Tier</Badge>
               </div>
             </div>
           </div>
@@ -58,20 +78,23 @@ export default function ProfilePage() {
         </motion.div>
 
         {editing && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-8">
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-8 overflow-hidden">
             <Card padding="lg" className="border-border bg-card shadow-sm">
               <h2 className="text-sm font-semibold tracking-tight uppercase text-muted-foreground mb-4">Identity Editor</h2>
               <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                <Input label="Given Name" defaultValue={p.firstName} icon={<User size={14} />} />
-                <Input label="Surname" defaultValue={p.lastName} />
-                <Input label="Email" type="email" defaultValue={p.email} icon={<Mail size={14} />} />
-                <Input label="Phone" type="tel" defaultValue={p.phone} icon={<Phone size={14} />} />
-                <Input label="Passport" defaultValue={p.passportNumber} icon={<CreditCard size={14} />} />
-                <Input label="Nationality" defaultValue={p.nationality} icon={<Globe size={14} />} />
+                <Input label="Given Name" defaultValue={firstName} icon={<UserIcon size={14} />} />
+                <Input label="Surname" defaultValue={lastName} />
+                <Input label="Email Address" type="email" defaultValue={user.email || ""} icon={<Mail size={14} />} disabled />
+                <Input label="Phone Contact" type="tel" placeholder="None provided" icon={<Phone size={14} />} />
+                <Input label="Travel Identity" placeholder="No document on file" icon={<CreditCard size={14} />} />
+                <Input label="Nationality" placeholder="Unspecified" icon={<Globe size={14} />} />
+              </div>
+              <div className="flex justify-end gap-2 text-xs text-muted-foreground italic mb-2">
+                Profiles are securely managed via Firebase encrypted storage.
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="secondary" onClick={() => setEditing(false)}>Cancel</Button>
-                <Button onClick={() => setEditing(false)}>Commit Changes</Button>
+                <Button variant="secondary" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
+                <Button size="sm" onClick={() => setEditing(false)}>Commit Changes</Button>
               </div>
             </Card>
           </motion.div>
@@ -114,7 +137,7 @@ export default function ProfilePage() {
               })}
             </Card>
 
-            <Button variant="outline" className="w-full mt-4 text-[var(--destructive)] border-destructive/20 hover:bg-destructive/10 hover:text-[var(--destructive)]">
+            <Button onClick={handleLogout} variant="outline" className="w-full mt-4 text-[var(--destructive)] border-destructive/20 hover:bg-destructive/10 hover:text-[var(--destructive)]">
               <LogOut size={14} className="mr-2" /> Terminate Session
             </Button>
           </motion.div>

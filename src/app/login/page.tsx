@@ -17,6 +17,7 @@ export default function LoginPage() {
   
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +36,7 @@ export default function LoginPage() {
     
     try {
       if (isRegistering) {
-        await registerWithEmail(email, password);
+        await registerWithEmail(email, password, fullName);
       } else {
         await loginWithEmail(email, password);
       }
@@ -79,6 +80,15 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-3">
+              {isRegistering && (
+                <Input
+                  label="Full Name"
+                  placeholder="Enter your full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              )}
               <Input
                 label="Email"
                 type="email"

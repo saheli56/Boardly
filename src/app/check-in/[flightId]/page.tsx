@@ -24,6 +24,7 @@ import { CHECK_IN_STEPS, BAGGAGE_PRICES } from "@/lib/constants";
 import { formatTime, formatDate } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { listenToSeats, occupySeat, registerCheckInPing } from "@/lib/firebase/services";
+import { useAuth } from "@/components/providers/auth-provider";
 import type { Seat, BaggageItem } from "@/types";
 
 const slideVariants = {
@@ -133,6 +134,7 @@ function SeatButton({ seat, isSelected, onSelect }: { seat: Seat; isSelected: bo
 export default function CheckInFlightPage({ params }: { params: Promise<{ flightId: string }> }) {
   const { flightId } = use(params);
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const flight = MOCK_FLIGHTS.find((f) => f.id === flightId) || MOCK_FLIGHTS[0];
 
   const [step, setStep] = useState(1);
@@ -161,7 +163,21 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
   const [baggage, setBaggage] = useState<{ type: string; weight: number; price: number }[]>([]);
   const [printTag, setPrintTag] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [passengerData, setPassengerData] = useState({ firstName: "John", lastName: "Doe", email: "john@example.com", phone: "", passportNumber: "", nationality: "" });
+  const [passengerData, setPassengerData] = useState({ firstName: "", lastName: "", email: "", phone: "", passportNumber: "", nationality: "" });
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      const [first, ...rest] = (user.displayName || "Anonymous Agent").split(" ");
+      setPassengerData({
+        firstName: first,
+        lastName: rest.join(" ") || " ",
+        email: user.email || "",
+        phone: "",
+        passportNumber: "",
+        nationality: ""
+      });
+    }
+  }, [user, authLoading]);
 
   const goNext = () => { if (step < 4) { setDirection(1); setStep((s) => s + 1); } };
   const goBack = () => { if (step > 1) { setDirection(-1); setStep((s) => s - 1); } };
@@ -340,7 +356,7 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
                 <div className="space-y-6">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-2">Participant</p>
-                    <p className="text-sm font-medium">{passengerData.firstName || "John"} {passengerData.lastName || "Doe"}</p>
+                    <p className="text-sm font-medium">{passengerData.firstName} {passengerData.lastName}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-2">Allocation</p>

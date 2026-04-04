@@ -1,17 +1,16 @@
 import type { Flight, Passenger, Seat, BoardingPass, AdminStats, BaggageItem } from "@/types";
 
-/* ─── Sample passenger ─── */
 export const MOCK_PASSENGER: Passenger = {
   id: "pax-001",
-  firstName: "Alex",
-  lastName: "Morgan",
-  email: "alex.morgan@email.com",
-  phone: "+1 555 012 3456",
-  dateOfBirth: "1992-06-15",
-  passportNumber: "US9283746",
-  nationality: "US",
-  frequentFlyerTier: "gold",
-  frequentFlyerId: "BDL-GLD-92837",
+  firstName: "Guest",
+  lastName: "User",
+  email: "guest@example.com",
+  phone: "Not provided",
+  dateOfBirth: "1990-01-01",
+  passportNumber: "Not on file",
+  nationality: "Unspecified",
+  frequentFlyerTier: "silver",
+  frequentFlyerId: "BDL-XXX-00000",
 };
 
 /* ─── Sample flights ─── */

@@ -16,9 +16,10 @@ import {
   ChevronRight
 } from "lucide-react";
 import Link from "next/link";
-import { MOCK_FLIGHTS, MOCK_BOARDING_PASS, MOCK_PASSENGER } from "@/lib/mock-data";
+import { MOCK_FLIGHTS, MOCK_BOARDING_PASS } from "@/lib/mock-data";
 import { formatTime } from "@/lib/utils";
 import type { Flight, FlightStatus } from "@/types";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -104,8 +105,14 @@ const QUICK_ACTIONS = [
 ];
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth();
   const bp = MOCK_BOARDING_PASS;
   const activeFlights = MOCK_FLIGHTS.filter((f) => f.status === "scheduled" || f.status === "boarding");
+
+  if (loading) return <div className="min-h-dvh flex items-center justify-center text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Syncing Cloud Profile...</div>;
+
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest Agent";
+  const userInitials = (user?.displayName || user?.email?.split("@")[0] || "U").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="page-wrapper bg-background/50">
@@ -116,7 +123,7 @@ export default function DashboardPage() {
             Overview
           </h1>
           <p className="text-sm text-muted-foreground">
-            {MOCK_PASSENGER.firstName} {MOCK_PASSENGER.lastName} • {activeFlights.length} upcoming segments
+            {displayName} • {activeFlights.length} upcoming segments
           </p>
         </motion.div>
 
@@ -203,16 +210,16 @@ export default function DashboardPage() {
               <Card padding="md" className="bg-secondary/50 border-none">
                 <div className="grid grid-cols-2 gap-y-4 gap-x-2">
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Flights YTD</p>
-                    <p className="text-sm font-semibold">24 segments</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Aura Level</p>
+                    <p className="text-sm font-semibold">Novice</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Distance</p>
-                    <p className="text-sm font-semibold">48,203 mi</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Travel Class</p>
+                    <p className="text-sm font-semibold italic">Standard</p>
                   </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Status</p>
-                    <p className="text-sm font-semibold flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-primary" />Gold Tier</p>
+                  <div className="col-span-2 pt-2 border-t border-border/20">
+                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Identity Verified</p>
+                     <p className="text-[11px] font-mono opacity-60 truncate">{user?.uid}</p>
                   </div>
                 </div>
               </Card>
