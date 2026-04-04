@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 type AppScaffoldProps = {
   title: string;
@@ -36,7 +37,7 @@ export function AppScaffold({ title, subtitle, children, rightSlot }: AppScaffol
               {title}
             </ThemedText>
           </View>
-          {rightSlot}
+          <ThemeToggle />
         </View>
         {children}
       </ScrollView>
