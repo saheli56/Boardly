@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -7,66 +8,33 @@ import { AppScaffold } from '@/components/ui/app-scaffold';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { baggageTags } from '@/constants/checkin-data';
 import { Colors } from '@/constants/theme';
-import { useCheckInFlow } from '@/context/checkin-flow-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useCheckInFlow } from '@/context/checkin-flow-context';
 
 export default function BaggageScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
+  const { status, confirmBaggage, bagsCount } = useCheckInFlow();
+  const [localBags, setLocalBags] = useState(0);
   const router = useRouter();
-  const flow = useCheckInFlow();
 
-  const bagCountOptions = [0, 1, 2, 3];
-  const dropSlots = ['Self Drop Belt 7', 'Priority Counter 3', 'North Gate Belt 2'];
-  const canContinue = flow.checkedBags === 0 || flow.bagDropSlot.length > 0;
+  const handleConfirm = () => {
+    confirmBaggage(localBags);
+    router.push('/explore');
+  };
 
-  if (!flow.started) {
+  if (status === 'not-started' || status === 'seat-selection') {
     return (
       <AppScaffold subtitle="Tracking" title="Baggage Journey">
-        <View style={[styles.gateCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <ThemedText type="subtitle">Begin from Check-in</ThemedText>
-          <ThemedText style={{ color: palette.icon }}>
-            Baggage options are unlocked when the guided check-in flow starts.
+        <View style={{ alignItems: 'center', marginTop: 40, gap: 12 }}>
+          <IconSymbol name="suitcase.fill" size={48} color={palette.border} />
+          <ThemedText style={{ color: palette.icon, textAlign: 'center' }}>
+            Nothing to track yet.{'\n'}Complete seat selection to manage baggage.
           </ThemedText>
-          <Pressable style={[styles.gateButton, { backgroundColor: palette.tint }]} onPress={() => router.push('/')}>
-            <ThemedText style={styles.gateButtonText}>Go to Check-in</ThemedText>
-          </Pressable>
         </View>
       </AppScaffold>
     );
   }
-
-  if (!flow.seatComplete) {
-    return (
-      <AppScaffold subtitle="Tracking" title="Baggage Journey">
-        <View style={[styles.gateCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <ThemedText type="subtitle">Seat selection pending</ThemedText>
-          <ThemedText style={{ color: palette.icon }}>
-            Confirm your seat first. We assign baggage workflow and boarding zone based on your seat and service profile.
-          </ThemedText>
-          <Pressable
-            style={[styles.gateButton, { backgroundColor: palette.tint }]}
-            onPress={() => router.push('/explore')}>
-            <ThemedText style={styles.gateButtonText}>Select Seat</ThemedText>
-          </Pressable>
-        </View>
-      </AppScaffold>
-    );
-  }
-
-  const displayedBags = Array.from({ length: flow.checkedBags }, (_, idx) => {
-    const existing = baggageTags[idx];
-    if (existing) {
-      return existing;
-    }
-    return {
-      id: `bag-dynamic-${idx + 1}`,
-      tagNumber: `BG-94821${idx + 2}`,
-      status: 'tagged' as const,
-      belt: flow.bagDropSlot,
-      updatedAt: 'just now',
-    };
-  });
 
   return (
     <AppScaffold
@@ -77,95 +45,51 @@ export default function BaggageScreen() {
           <IconSymbol name="suitcase.fill" size={18} color={palette.info} />
         </View>
       }>
-      <Animated.View
-        entering={FadeInDown.delay(30).duration(380)}
-        style={[styles.plannerCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <ThemedText type="subtitle">Plan Checked Bags</ThemedText>
-        <ThemedText style={{ color: palette.icon }}>
-          Choose bag count and drop point. This data is used to generate your final ticket metadata.
-        </ThemedText>
 
-        <View style={styles.optionRow}>
-          {bagCountOptions.map((count) => {
-            const active = flow.checkedBags === count;
-            return (
-              <Pressable
-                key={count}
-                style={[
-                  styles.countChip,
-                  {
-                    borderColor: active ? palette.info : palette.border,
-                    backgroundColor: active ? `${palette.info}1A` : palette.surfaceAlt,
-                  },
-                ]}
-                onPress={() => {
-                  flow.setCheckedBags(count);
-                  if (count === 0) {
-                    flow.setBagDropSlot('');
-                  }
-                }}>
-                <ThemedText style={{ fontWeight: '800' }}>{count}</ThemedText>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {flow.checkedBags > 0 ? (
-          <View style={styles.dropList}>
-            {dropSlots.map((slot) => {
-              const active = flow.bagDropSlot === slot;
-              return (
-                <Pressable
-                  key={slot}
-                  style={[
-                    styles.dropSlot,
-                    {
-                      borderColor: active ? palette.tint : palette.border,
-                      backgroundColor: active ? `${palette.tint}18` : palette.surfaceAlt,
-                    },
-                  ]}
-                  onPress={() => flow.setBagDropSlot(slot)}>
-                  <ThemedText style={{ fontWeight: '700' }}>{slot}</ThemedText>
-                </Pressable>
-              );
-            })}
+      {status === 'baggage' && (
+        <Animated.View entering={FadeInDown.duration(420)} style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <ThemedText type="subtitle">How many bags are you checking?</ThemedText>
+          <View style={styles.counterRow}>
+            <Pressable
+              onPress={() => setLocalBags(Math.max(0, localBags - 1))}
+              style={[styles.counterBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+              <ThemedText style={styles.counterText}>-</ThemedText>
+            </Pressable>
+            <ThemedText style={styles.counterValue}>{localBags}</ThemedText>
+            <Pressable
+              onPress={() => setLocalBags(localBags + 1)}
+              style={[styles.counterBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+              <ThemedText style={styles.counterText}>+</ThemedText>
+            </Pressable>
           </View>
-        ) : (
-          <ThemedText style={{ color: palette.icon }}>Cabin-only traveler. No drop slot needed.</ThemedText>
-        )}
-
-        <Pressable
-          disabled={!canContinue}
-          style={[
-            styles.continueButton,
-            {
-              backgroundColor: canContinue ? palette.tint : palette.border,
-            },
-          ]}
-          onPress={() => {
-            if (!flow.completeBaggage()) return;
-            router.push('/updates');
-          }}>
-          <ThemedText style={styles.continueText}>Continue to Review</ThemedText>
-          <IconSymbol name="chevron.right" size={16} color="#FFFFFF" />
-        </Pressable>
-      </Animated.View>
-
-      {displayedBags.length === 0 ? (
-        <Animated.View
-          entering={FadeInDown.delay(70).duration(420)}
-          style={[styles.emptyCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <ThemedText type="subtitle">No checked baggage</ThemedText>
-          <ThemedText style={{ color: palette.icon }}>
-            Your ticket will be generated with cabin-only status.
-          </ThemedText>
+          <Pressable style={[styles.confirmButton, { backgroundColor: palette.tint }]} onPress={handleConfirm}>
+            <ThemedText style={{ color: '#FFFFFF', fontWeight: '700', textAlign: 'center' }}>Confirm & Finalize Pass</ThemedText>
+          </Pressable>
         </Animated.View>
-      ) : null}
+      )}
 
-      {displayedBags.map((bag, i) => (
+      {status === 'completed' && bagsCount === 0 && (
+        <View style={{ alignItems: 'center', marginTop: 40, gap: 12 }}>
+          <IconSymbol name="suitcase.fill" size={48} color={palette.border} />
+          <ThemedText style={{ color: palette.icon, textAlign: 'center' }}>
+            No bags checked in.
+          </ThemedText>
+        </View>
+      )}
+
+      {status === 'completed' && bagsCount > 0 && Array.from({ length: Math.max(bagsCount, 0) }).map((_, i) => {
+        const bag = baggageTags[i] || {
+          id: `bag-new-${i}`,
+          tagNumber: `BG-94821${2 + i}`,
+          status: 'tagged',
+          belt: 'Pending drop-off',
+          updatedAt: 'Just now',
+        };
+
+        return (
         <Animated.View
           key={bag.id}
-          entering={FadeInDown.delay(120 + i * 90).duration(420)}
+          entering={FadeInDown.delay(60 + i * 90).duration(420)}
           style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
           <View style={styles.rowBetween}>
             <ThemedText style={styles.tag}>{bag.tagNumber}</ThemedText>
@@ -180,7 +104,7 @@ export default function BaggageScreen() {
           </View>
 
           <View style={[styles.track, { backgroundColor: palette.surfaceAlt }]}>
-            <View style={[styles.fill, { backgroundColor: palette.info, width: getProgress(bag.status) }]} />
+            <View style={[styles.fill, { backgroundColor: palette.info, width: getProgress(bag.status as any) }]} />
           </View>
 
           <View style={styles.timelineRow}>
@@ -192,7 +116,7 @@ export default function BaggageScreen() {
             <ThemedText style={{ color: palette.icon }}>Loaded</ThemedText>
           </View>
         </Animated.View>
-      ))}
+      )})}
     </AppScaffold>
   );
 }
@@ -243,53 +167,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  plannerCard: {
-    borderWidth: 1,
-    borderRadius: 22,
-    padding: 16,
-    gap: 10,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  countChip: {
-    width: 48,
-    height: 44,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dropList: {
-    gap: 8,
-  },
-  dropSlot: {
-    borderWidth: 1,
-    borderRadius: 12,
-    minHeight: 42,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-  },
-  continueButton: {
-    minHeight: 46,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    flexDirection: 'row',
-    marginTop: 4,
-  },
-  continueText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-  },
-  emptyCard: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 14,
-    gap: 6,
   },
   card: {
     borderWidth: 1,
@@ -351,20 +228,33 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
   },
-  gateCard: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 16,
-    gap: 10,
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginVertical: 12,
   },
-  gateButton: {
-    minHeight: 44,
-    borderRadius: 12,
+  counterBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  gateButtonText: {
-    color: '#FFFFFF',
+  counterText: {
+    fontSize: 24,
     fontWeight: '800',
+  },
+  counterValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    minWidth: 32,
+    textAlign: 'center',
+  },
+  confirmButton: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    marginTop: 8,
   },
 });

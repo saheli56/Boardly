@@ -37,10 +37,7 @@ export function AppScaffold({ title, subtitle, children, rightSlot }: AppScaffol
               {title}
             </ThemedText>
           </View>
-          <View style={styles.headerActions}>
-            {rightSlot}
-            <ThemeToggle />
-          </View>
+          <ThemeToggle />
         </View>
         {children}
       </ScrollView>
@@ -69,11 +66,6 @@ const styles = StyleSheet.create({
   headerTextWrap: {
     flex: 1,
     gap: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   subtitle: {
     fontSize: 12,
