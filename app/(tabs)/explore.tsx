@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo, useState, useEffect } from 'react';
+import { Pressable, StyleSheet, View, Alert } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
@@ -10,12 +10,19 @@ import { seatMap, unavailableSeats, upcomingFlights } from '@/constants/checkin-
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useCheckInFlow } from '@/context/checkin-flow-context';
+import QRCode from 'react-native-qrcode-svg';
 
 export default function BoardingPassScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
-  const { status, selectedSeat: contextSeat, confirmSeat } = useCheckInFlow();
+  const checkin = useCheckInFlow();
+  const { status, selectedSeat: contextSeat, confirmSeat, selectedFlightId, bagsCount } = checkin;
   const [selectedSeat, setSelectedSeat] = useState(contextSeat || '3A');
+  const [ticketPayload, setTicketPayload] = useState<string | null>(null);
+  const [qrSize, setQrSize] = useState(160);
+  useEffect(() => {
+    if (contextSeat && contextSeat !== selectedSeat) setSelectedSeat(contextSeat);
+  }, [contextSeat, selectedSeat]);
   const router = useRouter();
 
   const flight = upcomingFlights[0];
@@ -64,6 +71,7 @@ export default function BoardingPassScreen() {
           <Meta label="Board" value="18:10" palette={palette} />
         </View>
 
+<<<<<<< HEAD
         {status === 'completed' && (
           <View style={StyleSheet.flatten([styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }])}>
             {bars.map((bar) => (
@@ -71,6 +79,28 @@ export default function BoardingPassScreen() {
             ))}
           </View>
         )}
+=======
+        <View onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            const max = Math.min(width - 32, height - 32, 220);
+            const size = Math.max(96, Math.min(180, Math.floor(max)));
+            setQrSize(size);
+          }}
+          style={[styles.qrArea, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+          {ticketPayload ? (
+            <View style={styles.qrWrap}>
+              <QRCode value={ticketPayload} size={qrSize} color="#000000" backgroundColor="#FFFFFF" />
+              <ThemedText style={[styles.qrCaption, { color: palette.icon }]}>Show this at the gate</ThemedText>
+            </View>
+          ) : status === 'completed' ? (
+            <ThemedText style={{ color: palette.icon }}>Ticket pending generation. Use &quot;Generate Pass&quot; below.</ThemedText>
+          ) : (
+            bars.map((bar) => (
+              <View key={bar.id} style={[styles.bar, { height: bar.h, backgroundColor: palette.text }]} />
+            ))
+          )}
+        </View>
+>>>>>>> 76d950a627ff4315f04239e70f33a907d32e3dbb
       </Animated.View>
 
       <Animated.View
@@ -78,7 +108,23 @@ export default function BoardingPassScreen() {
         style={StyleSheet.flatten([styles.seatCard, { backgroundColor: palette.surface, borderColor: palette.border }])}>
         <View style={styles.rowBetween}>
           <ThemedText type="subtitle">Seat Selection</ThemedText>
-          <IconSymbol name="ticket.fill" size={18} color={palette.icon} />
+          <View style={styles.rowActions}>
+            <IconSymbol name="ticket.fill" size={18} color={palette.icon} />
+            <Pressable
+              style={[styles.smallButton, { borderColor: palette.border, backgroundColor: palette.surfaceAlt }]}
+              onPress={() => {
+                if (status !== 'completed') {
+                  Alert.alert('Complete flow', 'Please finish the check-in steps (profile, seat, baggage, review) before generating a boarding pass.');
+                  return;
+                }
+                // generate a simple ticket payload locally
+                const id = `${flight.code.replace(/\s+/g, '')}-${selectedSeat}-${Date.now()}`;
+                const payload = `TICKET:${id}|FLIGHT:${flight.code}|SEAT:${selectedSeat}|BAGS:${bagsCount}|FLIGHTID:${selectedFlightId || ''}`;
+                setTicketPayload(payload);
+              }}>
+              <ThemedText style={{ fontWeight: '700' }}>Generate Pass</ThemedText>
+            </Pressable>
+          </View>
         </View>
         <ThemedText style={{ color: palette.icon }}>
           Premium seats are highlighted. Select any available seat to update your pass.
@@ -240,14 +286,24 @@ const styles = StyleSheet.create({
   qrArea: {
     borderWidth: 1,
     borderRadius: 10,
-    height: 72,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    height: 200,
+    flexDirection: 'column',
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
-    paddingBottom: 8,
-    paddingHorizontal: 8,
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     overflow: 'hidden',
+  },
+  qrWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+  },
+  qrCaption: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: '700',
   },
   bar: {
     width: 4,
@@ -338,5 +394,16 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 4,
     borderWidth: 1,
+  },
+  rowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  smallButton: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
 });
