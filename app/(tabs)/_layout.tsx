@@ -25,9 +25,8 @@ export default function TabLayout() {
           {
             backgroundColor: palette.surface,
             borderColor: palette.border,
-            height: 52 + insets.bottom,
-            paddingBottom: Math.max(6, insets.bottom),
-            paddingTop: 4,
+            height: 60 + insets.bottom,
+            paddingBottom: Math.max(8, insets.bottom),
           },
         ],
         tabBarLabelStyle: styles.tabLabel,
@@ -36,28 +35,28 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Check-in',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Pass',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="ticket.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="ticket.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="baggage"
         options={{
           title: 'Baggage',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="suitcase.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="suitcase.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="updates"
         options={{
           title: 'Updates',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="bell.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bell.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -65,7 +64,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="person.crop.circle.fill" color={color} />
+            <IconSymbol size={28} name="person.crop.circle.fill" color={color} />
           ),
         }}
       />
@@ -78,14 +77,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderWidth: 1,
     position: 'absolute',
-    marginHorizontal: 10,
-    marginBottom: 6,
-    borderRadius: 18,
-    paddingTop: 4,
+    left: 36,
+    right: 36,
+    marginBottom: 8,
+    borderRadius: 22,
+    paddingTop: 6,
     elevation: 4,
+    maxWidth: 920,
+    alignSelf: 'center',
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
   },
 });
