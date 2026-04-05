@@ -33,10 +33,24 @@ const slideVariants = {
   exit: (direction: number) => ({ x: direction > 0 ? -40 : 40, opacity: 0 }),
 };
 
+type SeatPreference = "none" | "window" | "aisle" | "exit" | "front";
+
+function matchesPreference(seat: Seat, preference: SeatPreference) {
+  if (preference === "none") return true;
+  if (seat.status !== "available") return false;
+
+  if (preference === "window") return seat.isWindow;
+  if (preference === "aisle") return seat.isAisle;
+  if (preference === "exit") return seat.isExit;
+  if (preference === "front") return seat.row <= 8;
+
+  return false;
+}
+
 /* ═══════════════════════════════════════════════════
    MATURE SEAT MAP
    ═══════════════════════════════════════════════════ */
-function SeatMap({ seats, selectedSeat, onSelect }: { seats: Seat[]; selectedSeat: Seat | null; onSelect: (seat: Seat) => void; }) {
+function SeatMap({ seats, selectedSeat, onSelect, recommendedSeatIds }: { seats: Seat[]; selectedSeat: Seat | null; onSelect: (seat: Seat) => void; recommendedSeatIds: Set<string>; }) {
   const seatsByRow = useMemo(() => {
     const map = new Map<number, Seat[]>();
     seats.forEach((s) => {
@@ -93,11 +107,27 @@ function SeatMap({ seats, selectedSeat, onSelect }: { seats: Seat[]; selectedSea
                 <div className="grid gap-1 items-center" style={{ gridTemplateColumns: "16px 1fr 20px 1fr", minHeight: isBusiness ? "32px" : "24px" }}>
                   <span className="text-[10px] font-mono font-medium text-muted-foreground text-center">{rowNum}</span>
                   <div className={`grid gap-1 ${isBusiness ? "grid-cols-2" : "grid-cols-3"}`}>
-                    {leftSeats.map((s) => <SeatButton key={s.id} seat={s} isSelected={selectedSeat?.id === s.id} onSelect={onSelect} />)}
+                    {leftSeats.map((s) => (
+                      <SeatButton
+                        key={s.id}
+                        seat={s}
+                        isSelected={selectedSeat?.id === s.id}
+                        isRecommended={recommendedSeatIds.has(s.id)}
+                        onSelect={onSelect}
+                      />
+                    ))}
                   </div>
                   <div className="flex justify-center"><div className="w-px h-full bg-border/30 min-h-[20px]" /></div>
                   <div className={`grid gap-1 ${isBusiness ? "grid-cols-2" : "grid-cols-3"}`}>
-                    {rightSeats.map((s) => <SeatButton key={s.id} seat={s} isSelected={selectedSeat?.id === s.id} onSelect={onSelect} />)}
+                    {rightSeats.map((s) => (
+                      <SeatButton
+                        key={s.id}
+                        seat={s}
+                        isSelected={selectedSeat?.id === s.id}
+                        isRecommended={recommendedSeatIds.has(s.id)}
+                        onSelect={onSelect}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -109,7 +139,7 @@ function SeatMap({ seats, selectedSeat, onSelect }: { seats: Seat[]; selectedSea
   );
 }
 
-function SeatButton({ seat, isSelected, onSelect }: { seat: Seat; isSelected: boolean; onSelect: (seat: Seat) => void; }) {
+function SeatButton({ seat, isSelected, isRecommended, onSelect }: { seat: Seat; isSelected: boolean; isRecommended: boolean; onSelect: (seat: Seat) => void; }) {
   const isOccupied = seat.status === "occupied";
   const isBusiness = seat.seatClass === "business";
 
@@ -119,11 +149,12 @@ function SeatButton({ seat, isSelected, onSelect }: { seat: Seat; isSelected: bo
       disabled={isOccupied}
       className={`
         ${isSelected ? "seat-selected shadow-sm" : isOccupied ? "seat-occupied" : "seat-available"}
+        ${isRecommended && !isSelected && !isOccupied ? "seat-highlight" : ""}
         ${isBusiness ? "h-8" : "h-6"}
         w-full flex items-center justify-center text-[9px] font-mono rounded cursor-pointer disabled:cursor-not-allowed
       `}
     >
-      {isOccupied ? "×" : ""}
+      {isOccupied ? "×" : seat.id}
     </button>
   );
 }
@@ -140,6 +171,7 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [dbSeats, setDbSeats] = useState<Seat[]>([]);
+  const [seatPreference, setSeatPreference] = useState<SeatPreference>("none");
   
   useEffect(() => {
     // For demo purposes, we lock to flight-001 seat map
@@ -152,6 +184,16 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
   const defaultSeat = useMemo(() => dbSeats.find(s => s.id === "14A") || dbSeats[0], [dbSeats]);
   const [originalSeat, setOriginalSeat] = useState<Seat | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+
+  const recommendedSeats = useMemo(() => {
+    if (seatPreference === "none") return [] as Seat[];
+    return dbSeats
+      .filter((seat) => seat.status === "available" && matchesPreference(seat, seatPreference))
+      .sort((a, b) => a.row - b.row || a.letter.localeCompare(b.letter));
+  }, [dbSeats, seatPreference]);
+
+  const recommendedSeatIds = useMemo(() => new Set(recommendedSeats.map((seat) => seat.id)), [recommendedSeats]);
+  const recommendedSeat = recommendedSeats[0] || null;
 
   useEffect(() => {
     if (dbSeats.length > 0 && !originalSeat) {
@@ -271,9 +313,50 @@ export default function CheckInFlightPage({ params }: { params: Promise<{ flight
                       </div>
                     )}
                   </div>
-                  <div className="overflow-y-auto max-h-[60vh] pb-4">
+                  <div className="mb-4 border border-border rounded-lg overflow-hidden bg-secondary/70 p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">Seat preference</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {[
+                          { value: "none" as const, label: "Any seat" },
+                          { value: "window" as const, label: "Window" },
+                          { value: "aisle" as const, label: "Aisle" },
+                          { value: "exit" as const, label: "Exit row" },
+                          { value: "front" as const, label: "Front" },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setSeatPreference(option.value)}
+                            className={`text-sm rounded-md px-3 py-2 transition-colors border ${seatPreference === option.value ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:border-primary hover:text-foreground"}`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {recommendedSeat ? (
+                      <div className="rounded-md bg-success/10 border border-success/30 p-3 text-sm text-success">
+                        Best match: <span className="font-semibold">{recommendedSeat.id}</span> — {recommendedSeat.seatClass} seat
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSeat(recommendedSeat)}
+                          className="ml-3 text-xs font-semibold uppercase tracking-wider text-success underline"
+                        >
+                          Use it
+                        </button>
+                      </div>
+                    ) : seatPreference !== "none" ? (
+                      <div className="rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive">
+                        No available seats match this preference right now.
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="overflow-y-auto max-h-[60vh] pb-4">
                     {dbSeats.length > 0 ? (
-                      <SeatMap seats={dbSeats} selectedSeat={selectedSeat} onSelect={setSelectedSeat} />
+                      <SeatMap seats={dbSeats} selectedSeat={selectedSeat} onSelect={setSelectedSeat} recommendedSeatIds={recommendedSeatIds} />
                     ) : (
                       <div className="h-64 flex items-center justify-center text-xs text-muted-foreground">Loading Manifest...</div>
                     )}
