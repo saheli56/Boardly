@@ -7,7 +7,6 @@ import Link from "next/link";
 import { seedDatabaseIfEmpty } from "@/lib/firebase/services";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
@@ -24,7 +23,7 @@ export default function LandingPage() {
     <div className="page-wrapper bg-background min-h-dvh flex flex-col">
       {/* ─── Minimal Hero ─── */}
       <section className="flex-1 flex flex-col justify-start items-center text-center px-4 sm:px-6 py-8 mt-4 max-w-3xl mx-auto w-full">
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
+        <motion.div custom={0} variants={fadeUp} initial={false} animate="visible" className="mb-8">
           <div className="w-12 h-12 bg-primary text-primary-foreground flex items-center justify-center rounded-lg mx-auto mb-6">
             <Plane size={20} className="rotate-45" />
           </div>
@@ -36,7 +35,7 @@ export default function LandingPage() {
           </p>
         </motion.div>
 
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+        <motion.div custom={1} variants={fadeUp} initial={false} animate="visible" className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
           <Link
             href="/check-in"
             className="flex h-10 w-full sm:w-auto items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -52,7 +51,7 @@ export default function LandingPage() {
           </Link>
         </motion.div>
 
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible" className="mt-20 w-full border-t border-border pt-12 text-left">
+        <motion.div custom={2} variants={fadeUp} initial={false} animate="visible" className="mt-20 w-full border-t border-border pt-12 text-left">
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-8">Why Boardly?</p>
           <div className="grid sm:grid-cols-3 gap-8">
             <div>
